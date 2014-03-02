@@ -1,0 +1,3 @@
+Package: *
+Pin: release o=LP-PPA-zentyal-experimental
+Pin-Priority: 700

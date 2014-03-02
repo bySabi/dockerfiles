@@ -1,0 +1,2 @@
+Erase user account files on:
+	extrausers/* --> delete all files, don´t delete "extrausers"

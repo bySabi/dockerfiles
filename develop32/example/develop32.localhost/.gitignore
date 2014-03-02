@@ -1,0 +1,4 @@
+.git-crypt/
+.ssh/
+develop/
+.gitconfig
