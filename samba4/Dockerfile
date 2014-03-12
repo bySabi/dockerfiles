@@ -27,8 +27,8 @@ ADD conf/samba4-pin-700 /etc/apt/preferences.d/samba4-pin-700
 ADD conf/sernet-samba-4.1.list /var/tmp/
 RUN \
 	cat /var/tmp/sernet-samba-4.1.list >> /etc/apt/sources.list && \
-	curl -O http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
-	dpkg -i sernet-samba-keyring_1.4_all.deb && \
+	curl -o /var/tmp/sernet-samba-keyring_1.4_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
+	dpkg -i /var/tmp/sernet-samba-keyring_1.4_all.deb && \
 	apt-get update && apt-get upgrade -y -q
 
 ## install & change SAMBA_START_MODE="none" to "classic"

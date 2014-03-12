@@ -1,7 +1,0 @@
-Package: *
-Pin: release o=LP-PPA-netatalk-stable
-Pin-Priority: 700
-
-Package: *
-Pin: release o=LP-PPA-zentyal-experimental
-Pin-Priority: 700

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-/usr/sbin/avahi-daemon -D
-/etc/init.d/netatalk start
+# run on debug mode to state on foreground
+exec /usr/sbin/netatalk -d

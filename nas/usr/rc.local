@@ -2,3 +2,5 @@
 
 #if BRIDGED wait for interface up
 [ $BRIDGED ] && pipework --wait
+
+exit 0

@@ -8,7 +8,6 @@ ENV=
 IMAGE=
 HOST_NAME=
 CONT_NAME=
-IP_ADDR=
 [ -f "docker-run.conf" ] && DOCKER_RUN_CONF="docker-run.conf"
 RUN_COMMAND=
 RUNTMP_COMMAND=
@@ -226,7 +225,6 @@ case "$1" in
 		if [ "$2" == "-q" ]; then
 			cat $DOQUER_LOCK_FILE
 		else
-			# grep -e PATTERN and -f FILE Pattern
 			docker ps -a | grep -e "IMAGE" -f $DOQUER_LOCK_FILE
 		fi
 		;;
@@ -250,22 +248,29 @@ case "$1" in
 		fi
 		if [ "$2" == "--pipe" ] ; then
 			isrootuser
-			ENV="$ENV -e BRIDGED=1"
-			PORT=
 			pipeflag=1
 			shift
 		fi
 		set_docker_vars "${*:2}"
+		if [ $pipeflag ] ; then
+			bridge=$(echo "$ENV" | grep -Po 'BRIDGED=([^\s]*)')
+			[ "$bridge" ] && {
+				export $bridge
+				PORT=""
+			}
+		else
+			ENV=$(echo "$ENV" | perl -pe 's/BRIDGED=.*?\s/BRIDGED= /')
+		fi
 		contid=$(docker run \
 			-d \
 			$ENV \
 			$HOST_NAME \
+			$CONT_NAME \
 			$PORT \
 			$VOLUME \
-			$CONT_NAME \
 			$IMAGE \
 			$RUN_COMMAND)
-		[ $pipeflag ] && pipework br0 $contid $IP_ADDR/24
+		[ $pipeflag ] && [ "$BRIDGED" ] && pipework br0 $contid "$BRIDGED"
 		echo  $contid
 		;;
 	runtmp)
@@ -275,8 +280,6 @@ case "$1" in
 		fi
 		if [ "$2" == "--pipe" ] ; then
 			isrootuser
-			ENV="$ENV -e BRIDGED=1"
-			PORT=
 			pipeflag=1
 			shift
 		fi
@@ -285,12 +288,11 @@ case "$1" in
 			-rm -t -i \
 			$ENV \
 			$HOST_NAME \
+			$CONT_NAME \
 			$PORT \
 			$VOLUME \
-			$CONT_NAME \
 			$IMAGE \
 			$RUNTMP_COMMAND
-	#	[ $pipeflag ] && pipework br0 $contid $IP_ADDR/24
 		;;
 	conf)
 		if [ "$2" == "-h" ] || [ "$2" == "--help" ] ; then
@@ -304,7 +306,6 @@ case "$1" in
 		echo "IMAGE=$IMAGE"
 		echo "HOST_NAME=$HOST_NAME"
 		echo "CONT_NAME=$CONT_NAME"
-		echo "IP_ADDR=$IP_ADDR"
 		echo "DOCKER_RUN_CONF=$DOCKER_RUN_CONF"
 		echo "RUN_COMMAND=$RUN_COMMAND"
 		echo "RUNTMP_COMMAND=$RUNTMP_COMMAND"
@@ -322,7 +323,7 @@ case "$1" in
 		lxc-attach -n $contid $ATTACH_COMMAND
 		;;
 	version)
-		echo "VERSION 0.2 __ bySabi"
+		echo "VERSION 0.4 __ bySabi"
 		;;
 	*)
 		echo "Usage: doquer COMMAND [arg...]"
