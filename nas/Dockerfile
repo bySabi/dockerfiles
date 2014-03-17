@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.0.6
+# VERSION 0.0.7
 
 FROM phusion/baseimage:0.9.8
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -13,10 +13,6 @@ ENV LC_ALL en_US.UTF-8
 RUN \
 	echo "Europe/Madrid" > /etc/timezone && \
 	dpkg-reconfigure -f noninteractive tzdata
-
-# Disable SSH
-#RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
-
 
 RUN \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
@@ -48,14 +44,15 @@ RUN \
 	sed 's/#enable-dbus=yes$/enable-dbus=no/' -i /etc/avahi/avahi-daemon.conf && \
 
 :	'## Install goodsync' && \
-	curl -s http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz | tar -v -C /usr/sbin -xz && \
-	chown -R root:root /usr/sbin/goodsync-release-x86_64 && \
-	ln -s /usr/sbin/goodsync-release-x86_64 /usr/sbin/goodsync && \
+	mkdir -p /usr/sbin/goodsync && \
+	curl http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz 
+	| tar -v --strip-components=1 -C /usr/sbin/goodsync -xz && \
+	chown -R root:root /usr/sbin/goodsync && \
 
 	apt-get install -y --no-install-recommends make perl cpanminus && \
 
-:	'# Enable "extra" users, this makes \
-	# overlaying our passwd/shadow/group content easier' && \
+:	'# Enable "extra" users, this makes
+	 # overlaying our passwd/shadow/group content easier' && \
 	apt-get install -y libnss-extrausers && \
 	sed -i '/^\(passwd\|group\|shadow\):/{ s/$/ extrausers/; }' /etc/nsswitch.conf
 
@@ -70,9 +67,6 @@ ADD conf/smb.service /etc/avahi/services/smb.service
 # user management tool
 ADD usr/nas-user /usr/local/bin/
 
-# xinetd services
-#ADD conf/sshd /etc/xinetd.d/
-
 # init script. pipework check.
 ADD usr/rc.local /etc/rc.local
 
@@ -83,7 +77,6 @@ ADD usr/smbd.sh /etc/service/smbd/run
 ADD usr/nmbd.sh /etc/service/nmbd/run
 ADD usr/goodsync.sh /etc/service/goodsync/run
 ADD usr/sshd.sh /etc/service/sshd/run
-#ADD usr/xinetd.sh /etc/service/xinetd/run
 
 
 # pipework --wait
