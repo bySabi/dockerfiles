@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec /usr/sbin/gs-server/gs-server
+exec /usr/sbin/goodsync/gs-server

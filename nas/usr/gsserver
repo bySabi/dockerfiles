@@ -3,7 +3,7 @@
 
 case "$1" in
 	start)
-		start-stop-daemon --quiet --start --background --chuid root:root --exec /usr/sbin/gs-server/gs-server
+		start-stop-daemon --quiet --start --background --chuid root:root --exec /usr/sbin/goodsync/gs-server
 		;;
 	stop)
 		start-stop-daemon --quiet --stop --exec /usr/sbin/gs-server

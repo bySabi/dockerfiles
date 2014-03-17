@@ -69,6 +69,11 @@ _docker_build()
 	_filedir
 }
 
+_docker_cleanbuild()
+{
+	_filedir
+}
+
 _docker_run()
 {
 	case "$cur" in
@@ -123,6 +128,7 @@ _doquer()
 			integrity
 			show
 			build
+			cleanbuild
 			run
 			runtmp
 			conf

@@ -119,6 +119,13 @@ help_build() {
 	echo
 }
 
+help_cleanbuild() {
+	echo "Usage: doquer cleanbuild [path|args...]"
+	echo
+	echo "Perform \"rmall\", \"rmiall\" and delete a container from a configuration file"
+	echo
+}
+
 help_run() {
 	echo "Usage: doquer run [OPTIONS] [path|args...]"
 	echo
@@ -236,10 +243,30 @@ case "$1" in
 		set_docker_vars "${*:2}"
 		docker_image_dir=$(dirname ${DOCKER_RUN_CONF})
 		[ -d "$docker_image_dir/usr" ] && chmod 755 $docker_image_dir/usr/*
+		[ -d "$docker_image_dir/conf" ] && chmod 644 $docker_image_dir/conf/*
 		docker build \
 			-rm \
 			-t $IMAGE \
 			$docker_image_dir
+		;;
+	cleanbuild)
+		if [ "$2" == "-h" ] || [ "$2" == "--help" ] ; then
+			help_cleanbuild
+			exit 1
+		fi
+		set_docker_vars "${*:2}"
+		if ! doquer rmall -f 2>/dev/null
+		then
+			if ! doquer rmall f 2>/dev/null
+			then 
+				true
+			fi
+		fi
+		doquer rmiall
+		if docker rmi $IMAGE
+		then
+			echo Deleted: $IMAGE
+		fi
 		;;
 	run)
 		if [ "$2" == "-h" ] || [ "$2" == "--help" ] ; then
@@ -260,6 +287,10 @@ case "$1" in
 			}
 		else
 			ENV=$(echo "$ENV" | perl -pe 's/BRIDGED=.*?\s/BRIDGED= /')
+		fi
+		if ! docker inspect $IMAGE 1>/dev/null 2>&1
+		then
+			doquer build
 		fi
 		contid=$(docker run \
 			-d \
@@ -323,7 +354,7 @@ case "$1" in
 		lxc-attach -n $contid $ATTACH_COMMAND
 		;;
 	version)
-		echo "VERSION 0.4 __ bySabi"
+		echo "VERSION 0.5 __ bySabi"
 		;;
 	*)
 		echo "Usage: doquer COMMAND [arg...]"
@@ -338,6 +369,7 @@ case "$1" in
 		echo "	integrity	Check integrity, remove not exist container"
 		echo "	show		Show lock container´s"
 		echo "	build		Build a container from a configuration file"
+		echo "	cleanbuild	Perform \"rmall\", \"rmiall\" and delete a container from a configuration file"
 		echo "	run		Run a background container from a configuration file"
 		echo "	runtmp		Run a temporal container from a configuration file"
 		echo "	conf		Get configuration file"

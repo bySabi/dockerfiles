@@ -1,5 +1,5 @@
 # java
-# VERSION 0.0.1
+# VERSION 0.0.3
 
 FROM phusion/baseimage:0.9.8
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -14,26 +14,61 @@ RUN \
 	echo "Europe/Madrid" > /etc/timezone && \
 	dpkg-reconfigure -f noninteractive tzdata
 
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
+
+#ENV latest_jdk http://www.reucon.com/cdn/java/jdk-7u51-linux-x64.tar.gz
+ENV latest_jdk http://192.168.0.31:8080/jdk-7u51-linux-x64.tar.gz
+ENV mirror_jetty http://ftp.fau.de/eclipse/jetty/stable-9/dist
+ENV mirror_tomcat http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7
+
 
 RUN \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
-	apt-get update && apt-get upgrade -y -q && \
+	apt-get update && apt-get upgrade -y -q --no-install-recommends && \
 
-	apt-get install -y --no-install-recommends python-software-properties && \
-	add-apt-repository -y ppa:webupd8team/java && \
-	apt-get update && \
+:	'## Install ipsvd super server' && \
+	apt-get install -y --no-install-recommends ipsvd
 
-	echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections && \
-	apt-get install -y --no-install-recommends oracle-java7-installer && \
-	update-alternatives --display java
 
+# Install oracle jdk
 ENV JAVA_HOME /usr/lib/jvm/java-7-oracle
+RUN \
+	mkdir -p $JAVA_HOME && \
+
+	curl ${latest_jdk} | tar -v --strip-components=1 -C $JAVA_HOME -xz && \
+	update-alternatives --install /usr/bin/java java $JAVA_HOME/bin/java 20000 && \
+
+	useradd --create-home java
 
 
-ENV DATADIR /data
+# Install latest Jetty
+ENV JETTY_HOME /opt/jetty
+RUN \
+	mkdir -p $JETTY_HOME && \
+
+	eljetty=$(curl -s ${mirror_jetty}/ | grep -Po 'jetty-distribution-(.*).tar.gz\"' | sed 's|"||') && \
+	curl ${mirror_jetty}/${eljetty} | tar -v --strip-components=1 -C $JETTY_HOME -xz && \
+
+	rm -rf $JETTY_HOME/webapps.demo && \
+	chown -R java:java $JETTY_HOME && chown -R 775 $JETTY_HOME/webapps
+
+
+# Install latest Tomcat
+ENV CATALINA_HOME /opt/tomcat
+RUN \
+	mkdir -p $CATALINA_HOME && \
+
+	v=$(curl -s ${mirror_tomcat}/ | grep -Po 'v(.*)/\"' | sed 's|/"||') && \
+	tom=$(curl -s ${mirror_tomcat}/${v}/bin/ | grep -Po 'apache-tomcat-(.*)[0-9].tar.gz\"' | sed 's|"||') && \
+	curl ${mirror_tomcat}/${v}/bin/${tom} | tar -v --strip-components=1 -C $CATALINA_HOME -xz && \
+
+	chown -R java:java $CATALINA_HOME && chown -R 775 $CATALINA_HOME/webapps
+
+
+# create runit service
+ADD usr/sshd.sh /etc/service/sshd/run
+ADD usr/jetty.sh /etc/service.disable/jetty/run
+ADD usr/tomcat.sh /etc/service.disable/tomcat/run
 
 
 # Clean up APT when done.
