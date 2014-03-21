@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.0.7
+# VERSION 0.0.8
 
 FROM phusion/baseimage:0.9.8
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -16,45 +16,50 @@ RUN \
 
 RUN \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list
+	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
+	apt-get update && apt-get upgrade -y -q --no-install-recommends
+
+RUN \
+	apt-get install -y --no-install-recommends python-software-properties && \
+:	'## Install ipsvd super server' && \
+	apt-get install -y --no-install-recommends ipsvd
 
 
-# pinning 700 netatalk and samba4 to apt from https://portal.enterprisesamba.com/
-ADD conf/NAS-pin-700 /etc/apt/preferences.d/
+# Install samba4 from sernet enterprise repository https://portal.enterprisesamba.com/
+ADD conf/samba4-pin-700 /etc/apt/preferences.d/
 ADD conf/sernet-samba-4.1.list /var/tmp/
 RUN \
-	apt-get update && apt-get upgrade -y -q --no-install-recommends && \
-:	'## Install ipsvd super server' && \
-	apt-get install -y --no-install-recommends ipsvd && \
-
-:	'## Set sernet samba4 enterprise repository' && \
 	cat /var/tmp/sernet-samba-4.1.list >> /etc/apt/sources.list && \
 	curl -o /var/tmp/sernet-samba-keyring_1.4_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
 	dpkg -i /var/tmp/sernet-samba-keyring_1.4_all.deb && \
+	apt-get update && apt-get install -y --no-install-recommends samba
 
-:	'## Set netatalk ppa repository' && \
-	apt-get install -y --no-install-recommends python-software-properties && \
+
+# Install avahi-daemon & netatalk from "ali-asad-lotia" ppa repository
+ADD conf/netatalk-pin-700 /etc/apt/preferences.d/
+RUN \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
-
-	apt-get update && \
-
-:	'## Install netatalk, avahi-daemon and samba' && \
-	apt-get install -y --no-install-recommends netatalk avahi-daemon samba && \
+	apt-get update && apt-get install -y --no-install-recommends netatalk avahi-daemon && \
 :	'# disable avahi dbus support' && \
-	sed 's/#enable-dbus=yes$/enable-dbus=no/' -i /etc/avahi/avahi-daemon.conf && \
+	sed 's/#enable-dbus=yes$/enable-dbus=no/' -i /etc/avahi/avahi-daemon.conf
 
-:	'## Install goodsync' && \
+
+# Install goodsync
+RUN \
 	mkdir -p /usr/sbin/goodsync && \
-	curl http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz 
+	curl http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz \
 	| tar -v --strip-components=1 -C /usr/sbin/goodsync -xz && \
 	chown -R root:root /usr/sbin/goodsync && \
 
-	apt-get install -y --no-install-recommends make perl cpanminus && \
+	apt-get install -y --no-install-recommends make perl cpanminus
 
-:	'# Enable "extra" users, this makes
-	 # overlaying our passwd/shadow/group content easier' && \
-	apt-get install -y libnss-extrausers && \
+
+# Enable "extra" users, this makes overlaying our passwd/shadow/group content easier
+RUN \
+	apt-get install -y --no-install-recommends libnss-extrausers && \
 	sed -i '/^\(passwd\|group\|shadow\):/{ s/$/ extrausers/; }' /etc/nsswitch.conf
+# add user management tool
+ADD usr/nas-user /usr/local/bin/
 
 
 # afp and smb custom settings
@@ -64,13 +69,11 @@ ADD conf/afpd.service /etc/avahi/services/afpd.service
 ADD conf/smb.service /etc/avahi/services/smb.service
 
 
-# user management tool
-ADD usr/nas-user /usr/local/bin/
-
-# init script. pipework check.
+# add init script. Include pipework check.
 ADD usr/rc.local /etc/rc.local
 
-# create runit service
+
+# create runit service´s
 ADD usr/avahi-daemon.sh /etc/service/avahi-daemon/run
 ADD usr/netatalk.sh /etc/service/netatalk/run
 ADD usr/smbd.sh /etc/service/smbd/run
@@ -85,7 +88,7 @@ RUN \
 	chmod a+x /usr/local/bin/pipework
 
 
-ENV DATADIR /data
+ENV DATADIR /srv/data
 ENV CONFDIR /etc/conf
 
 

@@ -14,20 +14,21 @@ RUN \
 	echo "Europe/Madrid" > /etc/timezone && \
 	dpkg-reconfigure -f noninteractive tzdata
 
+RUN \
+	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
+	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
+	apt-get update && apt-get upgrade -y -q --no-install-recommends
+
+RUN \
+	apt-get install -y --no-install-recommends python-software-properties && \
+:	'## Install ipsvd super server' && \
+	apt-get install -y --no-install-recommends ipsvd
+
 
 #ENV latest_jdk http://www.reucon.com/cdn/java/jdk-7u51-linux-x64.tar.gz
 ENV latest_jdk http://192.168.0.31:8080/jdk-7u51-linux-x64.tar.gz
 ENV mirror_jetty http://ftp.fau.de/eclipse/jetty/stable-9/dist
 ENV mirror_tomcat http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7
-
-
-RUN \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
-	apt-get update && apt-get upgrade -y -q --no-install-recommends && \
-
-:	'## Install ipsvd super server' && \
-	apt-get install -y --no-install-recommends ipsvd
 
 
 # Install oracle jdk
