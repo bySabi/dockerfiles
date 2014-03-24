@@ -1,5 +1,5 @@
 # java
-# VERSION 0.0.3
+# VERSION 0.0.4
 
 FROM phusion/baseimage:0.9.8
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -17,7 +17,8 @@ RUN \
 RUN \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
-	apt-get update && apt-get upgrade -y -q --no-install-recommends
+	apt-get update 1>/dev/null && \
+	apt-get upgrade -y -q --no-install-recommends
 
 RUN \
 	apt-get install -y --no-install-recommends python-software-properties && \
@@ -26,17 +27,19 @@ RUN \
 
 
 #ENV latest_jdk http://www.reucon.com/cdn/java/jdk-7u51-linux-x64.tar.gz
-ENV latest_jdk http://192.168.0.31:8080/jdk-7u51-linux-x64.tar.gz
+#ENV latest_jdk http://192.168.0.31:8080/jdk-7u51-linux-x64.tar.gz
+ENV latest_jdk http://192.168.0.31:8080/server-jre-7u51-linux-x64.tar.gz
 ENV mirror_jetty http://ftp.fau.de/eclipse/jetty/stable-9/dist
 ENV mirror_tomcat http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7
 
 
 # Install oracle jdk
-ENV JAVA_HOME /usr/lib/jvm/java-7-oracle
+ENV JAVA_HOME /usr/lib/jvm/java-oracle
 RUN \
 	mkdir -p $JAVA_HOME && \
 
-	curl ${latest_jdk} | tar -v --strip-components=1 -C $JAVA_HOME -xz && \
+	curl -o /tmp/java.tar.gz ${latest_jdk} && \
+	tar --strip-components=1 -xvf /tmp/java.tar.gz -C $JAVA_HOME && \
 	update-alternatives --install /usr/bin/java java $JAVA_HOME/bin/java 20000 && \
 
 	useradd --create-home java
@@ -48,7 +51,8 @@ RUN \
 	mkdir -p $JETTY_HOME && \
 
 	eljetty=$(curl -s ${mirror_jetty}/ | grep -Po 'jetty-distribution-(.*).tar.gz\"' | sed 's|"||') && \
-	curl ${mirror_jetty}/${eljetty} | tar -v --strip-components=1 -C $JETTY_HOME -xz && \
+	curl -o /tmp/jetty.tar.gz ${mirror_jetty}/${eljetty} && \
+	tar --strip-components=1 -xvf /tmp/jetty.tar.gz -C $JETTY_HOME && \
 
 	rm -rf $JETTY_HOME/webapps.demo && \
 	chown -R java:java $JETTY_HOME && chown -R 775 $JETTY_HOME/webapps
@@ -61,7 +65,8 @@ RUN \
 
 	v=$(curl -s ${mirror_tomcat}/ | grep -Po 'v(.*)/\"' | sed 's|/"||') && \
 	tom=$(curl -s ${mirror_tomcat}/${v}/bin/ | grep -Po 'apache-tomcat-(.*)[0-9].tar.gz\"' | sed 's|"||') && \
-	curl ${mirror_tomcat}/${v}/bin/${tom} | tar -v --strip-components=1 -C $CATALINA_HOME -xz && \
+	curl -o /tmp/apache-tomcat.tar.gz ${mirror_tomcat}/${v}/bin/${tom} && \
+	tar --strip-components=1 -xvf /tmp/apache-tomcat.tar.gz -C $CATALINA_HOME && \
 
 	chown -R java:java $CATALINA_HOME && chown -R 775 $CATALINA_HOME/webapps
 

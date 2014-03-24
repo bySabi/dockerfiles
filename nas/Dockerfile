@@ -17,7 +17,8 @@ RUN \
 RUN \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
-	apt-get update && apt-get upgrade -y -q --no-install-recommends
+	apt-get update 1>/dev/null && \
+	apt-get upgrade -y -q --no-install-recommends
 
 RUN \
 	apt-get install -y --no-install-recommends python-software-properties && \
@@ -32,14 +33,16 @@ RUN \
 	cat /var/tmp/sernet-samba-4.1.list >> /etc/apt/sources.list && \
 	curl -o /var/tmp/sernet-samba-keyring_1.4_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
 	dpkg -i /var/tmp/sernet-samba-keyring_1.4_all.deb && \
-	apt-get update && apt-get install -y --no-install-recommends samba
+	apt-get update 1>/dev/null && \
+	apt-get install -y --no-install-recommends samba
 
 
 # Install avahi-daemon & netatalk from "ali-asad-lotia" ppa repository
 ADD conf/netatalk-pin-700 /etc/apt/preferences.d/
 RUN \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
-	apt-get update && apt-get install -y --no-install-recommends netatalk avahi-daemon && \
+	apt-get update 1>/dev/null && \
+	apt-get install -y --no-install-recommends netatalk avahi-daemon && \
 :	'# disable avahi dbus support' && \
 	sed 's/#enable-dbus=yes$/enable-dbus=no/' -i /etc/avahi/avahi-daemon.conf
 

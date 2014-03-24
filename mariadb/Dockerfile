@@ -17,7 +17,8 @@ RUN \
 RUN \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
-	apt-get update && apt-get upgrade -y -q --no-install-recommends
+	apt-get update 1>/dev/null && \
+	apt-get upgrade -y -q --no-install-recommends
 
 RUN \
 	apt-get install -y --no-install-recommends python-software-properties
@@ -32,7 +33,8 @@ ENV DATADIR /srv/data
 RUN \
 	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
 	add-apt-repository 'deb http://mirror.1000mbps.com/mariadb/repo/5.5/ubuntu precise main' && \
-	apt-get update && apt-get install -q -y --no-install-recommends mariadb-server && \
+	apt-get update 1>/dev/null && \
+	apt-get install -q -y --no-install-recommends mariadb-server && \
 
 :	'# cleanup' && \
 	rm -r /var/lib/mysql && \
