@@ -1,7 +1,7 @@
 # nas
 # VERSION 0.0.8
 
-FROM phusion/baseimage:0.9.8
+FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -50,8 +50,8 @@ RUN \
 # Install goodsync
 RUN \
 	mkdir -p /usr/sbin/goodsync && \
-	curl http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz \
-	| tar -v --strip-components=1 -C /usr/sbin/goodsync -xz && \
+	curl -o /tmp/goodsync.tar.gz http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz && \
+	tar --strip-components=1 -xvf /tmp/goodsync.tar.gz -C /usr/sbin/goodsync && \
 	chown -R root:root /usr/sbin/goodsync && \
 
 	apt-get install -y --no-install-recommends make perl cpanminus

@@ -1,5 +1,5 @@
-# MariaDB
-# VERSION 0.0.3
+# golang
+# VERSION 0.0.1
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -21,36 +21,28 @@ RUN \
 	apt-get upgrade -y -q --no-install-recommends
 
 RUN \
-	apt-get install -y --no-install-recommends python-software-properties
+	apt-get install -y --no-install-recommends python-software-properties && \
+:	'## Install ipsvd super server' && \
+	apt-get install -y --no-install-recommends ipsvd
 
 
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
-
-
-#Install MariaDB
-ENV DATADIR /srv/data
 RUN \
-	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
-	add-apt-repository 'deb http://mirror.1000mbps.com/mariadb/repo/5.5/ubuntu precise main' && \
-	apt-get update 1>/dev/null && \
-	apt-get install -q -y --no-install-recommends mariadb-server && \
+	apt-get install -y --no-install-recommends build-essential mercurial git-core subversion
 
-:	'# cleanup' && \
-	rm -r /var/lib/mysql && \
-:	'# a mounted file systems table to make MariaDB happy' && \
-	cat /proc/mounts > /etc/mtab
+# env vars
+ENV GOPATH /root/go
+ENV PATH /root/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
-# set a custom my.cnf
-ADD conf/my.cnf /etc/mysql/my.cnf
-
-
-# add init script. Include mariadb setup
-#ADD usr/rc.local /etc/rc.local
+# Install golang
+RUN \
+	mkdir -p ${GOPATH} && \
+	golang=$(curl -s https://code.google.com/p/go/downloads/list | grep -Po 'go(.*).linux-amd64.tar.gz\"' | sed 's|"||') && \
+	curl -o /tmp/go.tar.gz https://${golang} && \
+	tar -xvf /tmp/go.tar.gz -C /usr/local
 
 
 # create runit service
-ADD usr/mariadb.sh /etc/service/mariadb/run
+ADD usr/sshd.sh /etc/service/sshd/run
 
 
 # Clean up APT when done.
