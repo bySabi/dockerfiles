@@ -48,14 +48,19 @@ RUN \
 
 
 # Install goodsync
+#ENV latest_goodsync http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz
+ENV latest_goodsync http://192.168.0.29:8000/files/goodsync-release-x86_64.tar.gz
 RUN \
 	mkdir -p /usr/sbin/goodsync && \
-	curl -o /tmp/goodsync.tar.gz http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz && \
+	curl -o /tmp/goodsync.tar.gz ${latest_goodsync} && \
 	tar --strip-components=1 -xvf /tmp/goodsync.tar.gz -C /usr/sbin/goodsync && \
 	chown -R root:root /usr/sbin/goodsync && \
 
 	apt-get install -y --no-install-recommends make perl cpanminus
 
+# Create "nas" user
+RUN \
+	useradd -M -U -s /bin/false -u 7777 nas
 
 # Enable "extra" users, this makes overlaying our passwd/shadow/group content easier
 RUN \

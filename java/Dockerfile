@@ -27,8 +27,8 @@ RUN \
 
 
 #ENV latest_jdk http://www.reucon.com/cdn/java/jdk-7u51-linux-x64.tar.gz
-#ENV latest_jdk http://192.168.0.31:8080/jdk-7u51-linux-x64.tar.gz
-ENV latest_jdk http://192.168.0.31:8080/server-jre-7u51-linux-x64.tar.gz
+#ENV latest_jdk http://192.168.0.29:8000/files/jdk-7u51-linux-x64.tar.gz
+ENV latest_jdk http://192.168.0.29:8000/files/server-jre-7u51-linux-x64.tar.gz
 ENV mirror_jetty http://ftp.fau.de/eclipse/jetty/stable-9/dist
 ENV mirror_tomcat http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7
 
@@ -42,7 +42,7 @@ RUN \
 	tar --strip-components=1 -xvf /tmp/java.tar.gz -C $JAVA_HOME && \
 	update-alternatives --install /usr/bin/java java $JAVA_HOME/bin/java 20000 && \
 
-	useradd --create-home java
+	useradd --create-home -U -s /bin/false -u 7777 java
 
 
 # Install latest Jetty

@@ -5,7 +5,7 @@ FROM bySabi/java
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 #ENV latest_youtrack_war http://download.jetbrains.com/charisma/youtrack-5.1.2.war
-ENV latest_youtrack_war http://192.168.0.31:8080/youtrack-5.1.2.war
+ENV latest_youtrack_war http://192.168.0.29:8000/files/youtrack-5.1.2.war
 
 ENV WEBAPPS $JETTY_HOME/webapps
 #ENV WEBAPPS $TOMCAT_HOME/webapps

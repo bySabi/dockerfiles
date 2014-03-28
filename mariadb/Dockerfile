@@ -34,6 +34,9 @@ RUN \
 	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
 	add-apt-repository 'deb http://mirror.1000mbps.com/mariadb/repo/5.5/ubuntu precise main' && \
 	apt-get update 1>/dev/null && \
+
+:	'# First that nothing create user mysql' && \
+	useradd -M -U -s /bin/false -u 7777 mysql && \
 	apt-get install -q -y --no-install-recommends mariadb-server && \
 
 :	'# cleanup' && \
