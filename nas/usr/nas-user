@@ -5,17 +5,24 @@ function update_ent {
 	tail -n1 /etc/passwd >> /var/lib/extrausers/passwd
 	tail -n1 /etc/shadow >> /var/lib/extrausers/shadow
 	tail -n1 /etc/group >> /var/lib/extrausers/group
+	check_integrity_extrausers
+}
+
+function check_integrity_extrausers {
+	yes | pwck /var/lib/extrausers/passwd 1>/dev/null
+	yes | pwck /var/lib/extrausers/shadow 1>/dev/null
+	yes | grpck /var/lib/extrausers/group 1>/dev/null
 }
 
 case $1 in
 	add)
-		# if user not exist
-		if ! id -u $2 >/dev/null 2>&1; then
-			useradd -M -g nas $2
+		useradd -M -g nas $2
+		if [ $? = 0 ]
+		then
+			echo "$2:$3" | chpasswd
+			echo -e "$3\n$3" | (smbpasswd -a -s $2)
+			update_ent
 		fi
-		echo "$2:$3" | chpasswd
-		echo -e "$3\n$3" | (smbpasswd -a -s $2)
-		update_ent
 		;;
 	delete)
 		cp /etc/passwd /etc/shadow /etc/group /tmp/
@@ -24,7 +31,7 @@ case $1 in
 			cat /var/lib/extrausers/$file >> /etc/$file
 		done
 
-		userdel $2
+		userdel $2 
 
 		for file in passwd shadow group; do
 			diff /tmp/$file /etc/$file | sed -n '/^-[^-]/{ s/^-//; p; }' >> /var/lib/extrausers/$file
@@ -35,13 +42,20 @@ case $1 in
 		echo -e "$3\n$3" | (smbpasswd -a -s $2)
 		update_ent
 		;;
-	update)
-		
+	integrity)
+		rm /var/lib/extrausers/*- /var/lib/extrausers/*.lock
+
+		cat /var/lib/extrausers/passwd >> /etc/passwd
+		cat /var/lib/extrausers/shadow >> /etc/shadow
+		cat /var/lib/extrausers/group >> /etc/group
+
+		yes | pwck
+		yes | grpck
 		;;
 	*)
 		echo "Usage: nas-user"
 		echo
-		echo "	nas-user [add|delete|password] <user> <password>"
+		echo "	nas-user [add|delete|password|integrity] <user> <password>"
 		echo
 		echo "	*The password option is mandatory for 'add' and 'password'."
 		;;
