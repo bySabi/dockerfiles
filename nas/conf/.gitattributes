@@ -1,1 +1,1 @@
-sernet-samba-4.1.list filter=git-crypt diff=git-crypt
+sernet-samba-4.list filter=git-crypt diff=git-crypt

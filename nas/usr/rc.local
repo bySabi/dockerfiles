@@ -1,9 +1,9 @@
 #!/bin/sh
 
-#if BRIDGED wait for interface up
+# if BRIDGED wait for interface up
 [ ${BRIDGED} ] && pipework --wait
 
-# user´s integrity
+# user integrity
 nas-user integrity
 
 

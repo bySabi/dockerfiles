@@ -28,9 +28,9 @@ RUN \
 
 # Install samba4 from sernet enterprise repository https://portal.enterprisesamba.com/
 ADD conf/samba4-pin-700 /etc/apt/preferences.d/
-ADD conf/sernet-samba-4.1.list /var/tmp/
+ADD conf/sernet-samba-4.list /etc/apt/sources.list.d/
 RUN \
-	cat /var/tmp/sernet-samba-4.1.list >> /etc/apt/sources.list && \
+	chown -R root:root /etc/apt/preferences.d /etc/apt/sources.list.d && \
 	curl -o /var/tmp/sernet-samba-keyring_1.4_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
 	dpkg -i /var/tmp/sernet-samba-keyring_1.4_all.deb && \
 	apt-get update 1>/dev/null && \
@@ -40,6 +40,7 @@ RUN \
 # Install avahi-daemon & netatalk from "ali-asad-lotia" ppa repository
 ADD conf/netatalk-pin-700 /etc/apt/preferences.d/
 RUN \
+	chown -R root:root /etc/apt/preferences.d && \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends netatalk avahi-daemon && \
@@ -63,11 +64,12 @@ RUN \
 	useradd -M -U -s /bin/false -u 7777 nas
 
 # Enable "extra" users, this makes overlaying our passwd/shadow/group content easier
+## user management tool
+ADD usr/nas-user /usr/local/bin/
 RUN \
+	chown root:root /usr/local/bin/nas-user && \
 	apt-get install -y --no-install-recommends libnss-extrausers && \
 	sed -i '/^\(passwd\|group\|shadow\):/{ s/$/ extrausers/; }' /etc/nsswitch.conf
-# add user management tool
-ADD usr/nas-user /usr/local/bin/
 
 
 # afp and smb custom settings
@@ -75,11 +77,13 @@ ADD conf/afp.conf /etc/netatalk/afp.conf
 ADD conf/smb.conf /etc/samba/smb.conf
 ADD conf/afpd.service /etc/avahi/services/afpd.service
 ADD conf/smb.service /etc/avahi/services/smb.service
-
+RUN \
+	chown root:root /etc/netatalk/afp.conf /etc/samba/smb.conf -R /etc/avahi/services
 
 # add init script. Include pipework check.
 ADD usr/rc.local /etc/rc.local
-
+RUN \
+	chown root:root /etc/rc.local
 
 # create runit service´s
 ADD usr/avahi-daemon.sh /etc/service/avahi-daemon/run
@@ -88,7 +92,8 @@ ADD usr/smbd.sh /etc/service/smbd/run
 ADD usr/nmbd.sh /etc/service/nmbd/run
 ADD usr/goodsync.sh /etc/service/goodsync/run
 ADD usr/sshd.sh /etc/service/sshd/run
-
+RUN \
+	chown root:root -R /etc/service
 
 # pipework --wait
 RUN \
