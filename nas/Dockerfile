@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.0.8
+# VERSION 0.1.0
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -18,11 +18,11 @@ RUN \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
 	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
 	apt-get update 1>/dev/null && \
-	apt-get upgrade -y -q --no-install-recommends
+	apt-get upgrade -y -q --no-install-recommends && \
+	apt-get install -y --no-install-recommends python-software-properties
 
+# Install ipsvd super server
 RUN \
-	apt-get install -y --no-install-recommends python-software-properties && \
-:	'## Install ipsvd super server' && \
 	apt-get install -y --no-install-recommends ipsvd
 
 
@@ -31,8 +31,8 @@ ADD conf/samba4-pin-700 /etc/apt/preferences.d/
 ADD conf/sernet-samba-4.list /etc/apt/sources.list.d/
 RUN \
 	chown -R root:root /etc/apt/preferences.d /etc/apt/sources.list.d && \
-	curl -o /var/tmp/sernet-samba-keyring_1.4_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
-	dpkg -i /var/tmp/sernet-samba-keyring_1.4_all.deb && \
+	curl -o /var/tmp/sernet-samba-keyring_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
+	dpkg -i /var/tmp/sernet-samba-keyring_all.deb && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends samba
 
@@ -49,15 +49,18 @@ RUN \
 
 
 # Install goodsync
-#ENV latest_goodsync http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz
-ENV latest_goodsync http://192.168.0.29:8000/files/goodsync-release-x86_64.tar.gz
+#latest_goodsync='http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz'
+#latest_goodsync='http://192.168.0.29:8000/files/goodsync-release-x86_64.tar.gz'
 RUN \
+	latest_goodsync='http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz' && \
 	mkdir -p /usr/sbin/goodsync && \
-	curl -o /tmp/goodsync.tar.gz ${latest_goodsync} && \
-	tar --strip-components=1 -xvf /tmp/goodsync.tar.gz -C /usr/sbin/goodsync && \
-	chown -R root:root /usr/sbin/goodsync && \
+	curl -o /var/tmp/goodsync.tar.gz ${latest_goodsync} && \
+	tar --strip-components=1 -xvf /var/tmp/goodsync.tar.gz -C /usr/sbin/goodsync && \
+	mkdir -p /var/log/goodsync
 
+RUN \
 	apt-get install -y --no-install-recommends make perl cpanminus
+
 
 # Create "nas" user
 RUN \
@@ -72,13 +75,22 @@ RUN \
 	sed -i '/^\(passwd\|group\|shadow\):/{ s/$/ extrausers/; }' /etc/nsswitch.conf
 
 
-# afp and smb custom settings
-ADD conf/afp.conf /etc/netatalk/afp.conf
+# samba custom settings
 ADD conf/smb.conf /etc/samba/smb.conf
-ADD conf/afpd.service /etc/avahi/services/afpd.service
 ADD conf/smb.service /etc/avahi/services/smb.service
+
+# netatalk custom settings
+ADD conf/afp.conf /etc/netatalk/afp.conf
+ADD conf/afpd.service /etc/avahi/services/afpd.service
 RUN \
 	chown root:root /etc/netatalk/afp.conf /etc/samba/smb.conf -R /etc/avahi/services
+
+# create "shared" dir
+RUN \
+	shared_dir="srv/shared" && \
+	mkdir -p ${shared_dir} && \
+	chmod -R 775 ${shared_dir} && chown -R nas:nas ${shared_dir}
+
 
 # add init script. Include pipework check.
 ADD usr/rc.local /etc/rc.local
@@ -99,10 +111,6 @@ RUN \
 RUN \
 	curl -o /usr/local/bin/pipework https://raw.github.com/jpetazzo/pipework/master/pipework && \
 	chmod a+x /usr/local/bin/pipework
-
-
-ENV DATADIR /srv/data
-ENV CONFDIR /etc/conf
 
 
 # Clean up APT when done.

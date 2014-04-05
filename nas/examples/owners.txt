@@ -1,0 +1,11 @@
+
+user-> joquer:joquer(7777:7777)
+	nas.localhost
+		user-> root:root
+			root
+			samba
+			netatalk
+			goodsync
+			extrauser
+		user-> joquer:joquer
+			shared

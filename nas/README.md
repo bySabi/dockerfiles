@@ -1,35 +1,39 @@
-# NAS a Netatalk (afp server) + Samba4 
+# NAS a Netatalk (afp server) + Samba4 + Goodsync
 
-A Dockerfile which produces a docker image that runs [Netatalk][netatalk] and [Samba4][samba] . Based on work of  [ewindisch/docker-samba][ewindisch] and [grigio/docker-timemachine][grigio].
+A Dockerfile which produces a docker image that runs [Netatalk][netatalk] , [Samba4][samba] and [Goodsync][goodsync]. Based on work of  [ewindisch/docker-samba][ewindisch] and [grigio/docker-timemachine][grigio].
 A `afpd` share configured as a Time Capsule.
 
 [netatalk]: http://netatalk.sourceforge.net/
+[goodsync]: http://www.goodsync.com/platforms/linux
 [grigio]: https://github.com/grigio/docker-timemachine
 [samba]: http://www.samba.org/
 [ewindisch]: https://github.com/ewindisch/docker-samba
 
+Use `doquer`[doquer], a homemade script for easy live docker.
+[doquer]: https://github.com/bySabi/my_docker_util/tree/master/doquer
+
 ## Image Creation
 
 ```
-$ sudo docker build -rm -t bySabi/NAS .
+$ doquer build
 ```
 
 ## Container Running
 
 ```
-$ ./docker-run.sh
+$ doquer run --pipe
 ```
 
 ## Add users
 
 ```
-$ ./docker-run.sh console
+$ sudo doquer attach NAS
 $ nas-user add usuario 1234
 ```
 
 IMPORTANT!!
 ---------------------------
-1- `docker-run.sh` is a hardcoded script. Edit with your settings before run. 
+1- `docker-run.conf` is a hardcoded script. Edit your settings before run.
 
 2- By default docker daemon `Max open files` limits  is too low and must set above `65535` otherwise `netatalk` malfunction (you see volume´s but can´t authenticate) .
 
@@ -43,7 +47,7 @@ $ tail -f /var/log/netatalk.log
 To solve add: `limit nofile 65536 65536` to upstart script `/etc/init/docker.conf`. See [discussion][discu].
 [discu]: https://groups.google.com/forum/#!msg/docker-user/T45Kc9vD804/xz7UZk_cilsJ
 
-3- For avahi afp discovery use `docker-run.sh daemon3`, need [pipework][pipe] for bind container to different IP than host. However can start container, `docker-run.sh daemon`, with default NATed subnet and add server address manually on `Finder`
+3- For avahi afp discovery need [pipework][pipe] for bind container to different IP than host. However can start container, `doquer run`, with default NATed subnet and add server address manually on `Finder`
 [pipe]:https://github.com/jpetazzo/pipework
 
 
@@ -57,7 +61,7 @@ etc/ directory and relaunch your containers.
 
 For convenience, a user management tool is available as:
 
-    $ ./nas-user [add|delete|password] <user> <password>
+    $ nas-user [add|delete|password] <user> <password>
 
 The password option is mandatory for 'add' and 'password'. If
 supplied, the password is ignored for the 'delete' feature.
