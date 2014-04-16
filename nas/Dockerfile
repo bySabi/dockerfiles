@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.1.0
+# VERSION 0.1.2
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -52,14 +52,23 @@ RUN \
 #latest_goodsync='http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz'
 #latest_goodsync='http://192.168.0.29:8000/files/goodsync-release-x86_64.tar.gz'
 RUN \
-	latest_goodsync='http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz' && \
+	latest_goodsync='http://192.168.0.29:8000/files/goodsync-release-x86_64.tar.gz' && \
 	mkdir -p /usr/sbin/goodsync && \
 	curl -o /var/tmp/goodsync.tar.gz ${latest_goodsync} && \
 	tar --strip-components=1 -xvf /var/tmp/goodsync.tar.gz -C /usr/sbin/goodsync && \
 	mkdir -p /var/log/goodsync
 
 RUN \
-	apt-get install -y --no-install-recommends make perl cpanminus
+	apt-get install -y --no-install-recommends make perl cpanminus && \
+	cpanm --notest HTTP::Server::Simple::CGI && \
+	cpanm --notest Net::DNS::Nameserver
+
+
+# Install lsyncd: for watches a local directory trees. precise lsyncd is a little outdated
+RUN \
+	apt-get install -y --no-install-recommends liblua5.1-0 lua5.1 rsync && \
+	curl -o /var/tmp/lsyncd.deb http://de.archive.ubuntu.com/ubuntu/pool/universe/l/lsyncd/lsyncd_2.1.5-1_amd64.deb && \
+	dpkg -i /var/tmp/lsyncd.deb
 
 
 # Create "nas" user
@@ -104,6 +113,7 @@ ADD usr/smbd.sh /etc/service/smbd/run
 ADD usr/nmbd.sh /etc/service/nmbd/run
 ADD usr/goodsync.sh /etc/service/goodsync/run
 ADD usr/sshd.sh /etc/service/sshd/run
+ADD usr/lsyncd.sh /etc/service/lsyncd/run
 RUN \
 	chown root:root -R /etc/service
 

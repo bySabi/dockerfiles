@@ -20,9 +20,9 @@ case $1 in
 		if [ $? = 0 ]
 		then
 			echo "$2:$3" | chpasswd
-			echo -e "$3\n$3" | (smbpasswd -a -s $2)
 			update_ent
 		fi
+		echo -e "$3\n$3" | (smbpasswd -a -s $2)
 		;;
 	delete)
 		cp /etc/passwd /etc/shadow /etc/group /tmp/
@@ -36,6 +36,8 @@ case $1 in
 		for file in passwd shadow group; do
 			diff /tmp/$file /etc/$file | sed -n '/^-[^-]/{ s/^-//; p; }' >> /var/lib/extrausers/$file
 		done
+
+		smbpasswd -x $2
 		;;
 	password)
 		echo "$2:$3" | chpasswd

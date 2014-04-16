@@ -1,12 +1,6 @@
 #!/bin/sh
 
+# wait for php5-fpm start
+sv start php5-fpm || exit 1
 
-[ "$DATADIR" ] && {
-	[ -f "$DATADIR/.deployed" ] || {
-		[ -d "$DATADIR/www" ] && chown -R www-data "$DATADIR/www"
-		touch "$DATADIR/.deployed"
-	}
-}
-
-/etc/init.d/php5-fpm start
-/etc/init.d/nginx start
+exec nginx

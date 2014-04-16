@@ -1,5 +1,5 @@
-# MariaDB
-# VERSION 0.0.5
+# prosody XMPP server
+# VERSION 0.0.1
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -21,35 +21,22 @@ RUN \
 	apt-get upgrade -y -q --no-install-recommends && \
 	apt-get install -y --no-install-recommends python-software-properties
 
-
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
-
-
-# Install MariaDB
+# Install ipsvd super server
 RUN \
-	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
-	add-apt-repository 'deb http://mirror.1000mbps.com/mariadb/repo/5.5/ubuntu precise main' && \
-	apt-get update 1>/dev/null && \
+	apt-get install -y --no-install-recommends ipsvd
 
-:	'# First that nothing create user mysql' && \
-	useradd -M -U -s /bin/false -u 7777 mysql && \
-	apt-get install -q -y --no-install-recommends mariadb-server && \
-:	'# cleanup' && \
-	rm -r /var/lib/mysql
-
-# set a custom my.cnf
-ADD conf/my.cnf /etc/mysql/my.cnf
+# Install prosody
 RUN \
-	chown root:root /etc/mysql/my.cnf
+	apt-get install -y prosody && \
 
-# add init script. Include mariadb setup
-ADD usr/rc.local /etc/rc.local
-RUN \
-	chown root:root /etc/rc.local
+	echo 'data_path /srv/conf/prosody/data' >> /etc/prosody/prosody.cfg.lua && \
+	sed -i -e 's/Include \+\"conf.*/Include \"\/srv\/conf\/prosody\/conf.d\/\*.cfg.lua\"/' /etc/prosody/prosody.cfg.lua && \
+	sed -i -e 's/daemonize \+=.*/daemonize = false;/' /etc/prosody/prosody.cfg.lua
+
 
 # create runit service´s
-ADD usr/mariadb.sh /etc/service/mariadb/run
+ADD usr/sshd.sh /etc/service/sshd/run
+ADD usr/prosody.sh /etc/service/prosody/run
 RUN \
 	chown root:root -R /etc/service
 

@@ -1,24 +1,13 @@
 #!/bin/sh
 
-
-# if not exist ${DATADIR}/mysql deploy it
-[ ${DATADIR} ] && {
-	if [ -d ${DATADIR}/mysql ]
-	then
-		chown -R mysql.mysql ${DATADIR}/mysql
-	else
-		mkdir -p ${DATADIR}/mysql
-
-		# Set datadir 
-		mysql_install_db --datadir=${DATADIR}/mysql
-		chown -R mysql.mysql ${DATADIR}/mysql
-
-		sv start mariadb
-ret_code=$?
-echo $ret_code >> /root/exitcode
-		# Set user/password admin and grant login from everywhere
-		echo "GRANT ALL ON *.* TO admin@'%' IDENTIFIED BY 'admin' WITH GRANT OPTION; FLUSH PRIVILEGES" | mysql
-	fi
+DATADIR=/srv/mariadb/mysql
+[ "$(ls -A ${DATADIR} 2>/dev/null)" ] || {
+	mkdir -p ${DATADIR}
+	chown -R mysql.mysql ${DATADIR}
+	# Set datadir
+	mysql_install_db --user=mysql --datadir=${DATADIR}
+	# Set user/password admin and grant login from everywhere
+#	echo "GRANT ALL ON *.* TO admin@'%' IDENTIFIED BY 'admin' WITH GRANT OPTION; FLUSH PRIVILEGES" | mysql
 }
 
 exit 0
