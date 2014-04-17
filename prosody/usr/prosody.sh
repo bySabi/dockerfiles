@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec /usr/bin/prosody
+exec /sbin/setuser prosody /usr/bin/prosody

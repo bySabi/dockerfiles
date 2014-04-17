@@ -1,3 +1,0 @@
-Package: *
-Pin: release o=LP-PPA-nginx-stable
-Pin-Priority: 700

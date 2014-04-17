@@ -25,12 +25,16 @@ RUN \
 RUN \
 	apt-get install -y --no-install-recommends ipsvd
 
+
 # Install prosody
 RUN \
 	apt-get install -y prosody && \
+	usermod -u 7777 prosody && groupmod -g 7777 prosody && \
+	mkdir -p /var/run/prosody && \
+	chown prosody:prosody -R /var/run/prosody /etc/prosody/prosody.cfg.lua && \
 
-	echo 'data_path /srv/conf/prosody/data' >> /etc/prosody/prosody.cfg.lua && \
-	sed -i -e 's/Include \+\"conf.*/Include \"\/srv\/conf\/prosody\/conf.d\/\*.cfg.lua\"/' /etc/prosody/prosody.cfg.lua && \
+	echo 'use_libevent = true;' >> /etc/prosody/prosody.cfg.lua && \
+	sed -i -e 's/Include \+\"conf.*/Include \"\/srv\/conf\/prosody\/conf.d\/\*.cfg.lua\";/' /etc/prosody/prosody.cfg.lua && \
 	sed -i -e 's/daemonize \+=.*/daemonize = false;/' /etc/prosody/prosody.cfg.lua
 
 
