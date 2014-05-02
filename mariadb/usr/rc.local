@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DATADIR=/srv/mariadb/mysql
+DATADIR=/srv/conf.d/mariadb/mysql
 [ "$(ls -A ${DATADIR} 2>/dev/null)" ] || {
 	mkdir -p ${DATADIR}
 	chown -R mysql.mysql ${DATADIR}

@@ -21,9 +21,10 @@ RUN \
 	apt-get upgrade -y -q --no-install-recommends && \
 	apt-get install -y --no-install-recommends python-software-properties
 
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
+
+# Disable SSH
+RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
+
 
 # Install dnsmasq
 RUN \
@@ -34,20 +35,18 @@ RUN \
 
 # Install lsyncd: for watches a local directory trees. precise lsyncd is a little outdated
 RUN \
+	latest_lsyncd=http://de.archive.ubuntu.com/ubuntu/pool/universe/l/lsyncd/lsyncd_2.1.5-1_amd64.deb    && \
 	apt-get install -y --no-install-recommends liblua5.1-0 lua5.1 rsync && \
-	curl -o /var/tmp/lsyncd.deb http://de.archive.ubuntu.com/ubuntu/pool/universe/l/lsyncd/lsyncd_2.1.5-1_amd64.deb && \
-	dpkg -i /var/tmp/lsyncd.deb
+	curl -L -o /var/tmp/lsyncd.deb ${latest_lsyncd} && \
+	dpkg -i /var/tmp/lsyncd.deb && \
+	mkdir -p /var/log/lsyncd
 
 
 # create runit service´s
-ADD usr/sshd.sh /etc/service/sshd/run
 ADD usr/dnsmasq.sh /etc/service/dnsmasq/run
 ADD usr/lsyncd.sh /etc/service/lsyncd/run
 RUN \
 	chown root:root -R /etc/service
-
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 
 # Clean up APT when done.

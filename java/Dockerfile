@@ -1,5 +1,5 @@
 # java
-# VERSION 0.0.4
+# VERSION 0.0.5
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -26,19 +26,12 @@ RUN \
 	apt-get install -y --no-install-recommends ipsvd
 
 
-#ENV latest_jdk http://www.reucon.com/cdn/java/jdk-7u51-linux-x64.tar.gz
-#ENV latest_jdk http://192.168.0.29:8000/files/jdk-7u51-linux-x64.tar.gz
-ENV latest_jdk http://192.168.0.29:8000/files/server-jre-7u51-linux-x64.tar.gz
-ENV mirror_jetty http://ftp.fau.de/eclipse/jetty/stable-9/dist
-ENV mirror_tomcat http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7
-
-
-# Install oracle jdk
+# Install oracle jre
 ENV JAVA_HOME /usr/lib/jvm/java-oracle
 RUN \
 	mkdir -p $JAVA_HOME && \
-
-	curl -o /var/tmp/java.tar.gz ${latest_jdk} && \
+	latest_jdk=http://download.oracle.com/otn-pub/java/jdk/8u5-b13/server-jre-8u5-linux-x64.tar.gz   && \
+	curl -L -C - -b "oraclelicense=accept-securebackup-cookie" -o /var/tmp/java.tar.gz ${latest_jdk} && \
 	tar --strip-components=1 -xvf /var/tmp/java.tar.gz -C $JAVA_HOME && \
 	update-alternatives --install /usr/bin/java java $JAVA_HOME/bin/java 20000 && \
 
@@ -49,9 +42,9 @@ RUN \
 ENV JETTY_HOME /opt/jetty
 RUN \
 	mkdir -p $JETTY_HOME && \
-
+	mirror_jetty=http://ftp.fau.de/eclipse/jetty/stable-9/dist   && \
 	eljetty=$(curl -s ${mirror_jetty}/ | grep -Po 'jetty-distribution-(.*).tar.gz\"' | sed 's|"||') && \
-	curl -o /var/tmp/jetty.tar.gz ${mirror_jetty}/${eljetty} && \
+	curl -L -o /var/tmp/jetty.tar.gz ${mirror_jetty}/${eljetty} && \
 	tar --strip-components=1 -xvf /var/tmp/jetty.tar.gz -C $JETTY_HOME && \
 
 	rm -rf $JETTY_HOME/webapps.demo && \
@@ -62,10 +55,10 @@ RUN \
 ENV CATALINA_HOME /opt/tomcat
 RUN \
 	mkdir -p $CATALINA_HOME && \
-
+	mirror_tomcat=http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7   && \
 	v=$(curl -s ${mirror_tomcat}/ | grep -Po 'v(.*)/\"' | sed 's|/"||') && \
 	tom=$(curl -s ${mirror_tomcat}/${v}/bin/ | grep -Po 'apache-tomcat-(.*)[0-9].tar.gz\"' | sed 's|"||') && \
-	curl -o /var/tmp/apache-tomcat.tar.gz ${mirror_tomcat}/${v}/bin/${tom} && \
+	curl -L -o /var/tmp/apache-tomcat.tar.gz ${mirror_tomcat}/${v}/bin/${tom} && \
 	tar --strip-components=1 -xvf /var/tmp/apache-tomcat.tar.gz -C $CATALINA_HOME && \
 
 	chown -R java:java $CATALINA_HOME && chown -R 775 $CATALINA_HOME/webapps

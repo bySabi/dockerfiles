@@ -34,7 +34,7 @@ RUN \
 	chown prosody:prosody -R /var/run/prosody /etc/prosody/prosody.cfg.lua && \
 
 	echo 'use_libevent = true;' >> /etc/prosody/prosody.cfg.lua && \
-	sed -i -e 's/Include \+\"conf.*/Include \"\/srv\/conf\/prosody\/conf.d\/\*.cfg.lua\";/' /etc/prosody/prosody.cfg.lua && \
+	sed -i -e 's/Include \+\"conf.*/Include \"\/srv\/conf.d\/prosody\/conf.d\/\*.cfg.lua\";/' /etc/prosody/prosody.cfg.lua && \
 	sed -i -e 's/daemonize \+=.*/daemonize = false;/' /etc/prosody/prosody.cfg.lua
 
 

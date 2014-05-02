@@ -58,7 +58,7 @@ RUN \
 	sed -i -e 's/access_log \+logs\/.*/access_log  \/var\/log\/nginx\/static.log;/' /etc/nginx/h5bp/location/expires.conf && \
 
 	sed -i -e 's/events \+{/daemon off;\n\nevents {/' /etc/nginx/nginx.conf && \
-	sed -i -e 's/include \+sites-enabled.*/include \/srv\/conf\/nginx\/sites-enabled\/\*;/' /etc/nginx/nginx.conf && \
+	sed -i -e 's/include \+sites-enabled.*/include \/srv\/conf.d\/nginx\/sites-enabled\/\*;/' /etc/nginx/nginx.conf && \
 	sed -i -e 's/error_log \+logs\/.*/error_log  \/var\/log\/nginx\/error.log warn;/' /etc/nginx/nginx.conf && \
 	sed -i -e 's/access_log \+logs\/.*/access_log  \/var\/log\/nginx\/access.log main;/' /etc/nginx/nginx.conf
 

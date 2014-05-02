@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.1.2
+# VERSION 0.1.6
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -31,32 +31,37 @@ ADD conf/samba4-pin-700 /etc/apt/preferences.d/
 ADD conf/sernet-samba-4.list /etc/apt/sources.list.d/
 RUN \
 	chown -R root:root /etc/apt/preferences.d /etc/apt/sources.list.d && \
-	curl -o /var/tmp/sernet-samba-keyring_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
+	curl -L -o /var/tmp/sernet-samba-keyring_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
 	dpkg -i /var/tmp/sernet-samba-keyring_all.deb && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends samba
 
+# samba custom settings
+ADD conf/smb.conf /etc/samba/smb.conf
+RUN chown root:root /etc/samba/smb.conf
 
-# Install avahi-daemon & netatalk from "ali-asad-lotia" ppa repository
+
+# Install avahi & netatalk from "ali-asad-lotia" ppa repository
 ADD conf/netatalk-pin-700 /etc/apt/preferences.d/
 RUN \
 	chown -R root:root /etc/apt/preferences.d && \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
 	apt-get update 1>/dev/null && \
-	apt-get install -y --no-install-recommends netatalk avahi-daemon && \
-:	'# disable avahi dbus support' && \
-	sed 's/#enable-dbus=yes$/enable-dbus=no/' -i /etc/avahi/avahi-daemon.conf
+	apt-get install -y --no-install-recommends netatalk avahi-daemon
+
+# netatalk custom settings
+ADD conf/afp.conf /etc/netatalk/afp.conf
+RUN chown root:root /etc/netatalk/afp.conf
 
 
 # Install goodsync
-#latest_goodsync='http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz'
-#latest_goodsync='http://192.168.0.29:8000/files/goodsync-release-x86_64.tar.gz'
 RUN \
-	latest_goodsync='http://192.168.0.29:8000/files/goodsync-release-x86_64.tar.gz' && \
+	latest_goodsync=http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz   && \
 	mkdir -p /usr/sbin/goodsync && \
-	curl -o /var/tmp/goodsync.tar.gz ${latest_goodsync} && \
-	tar --strip-components=1 -xvf /var/tmp/goodsync.tar.gz -C /usr/sbin/goodsync && \
-	mkdir -p /var/log/goodsync
+	curl -L -o /srv/goodsync.tar.gz ${latest_goodsync} && \
+	tar --strip-components=1 -xvf /srv/goodsync.tar.gz -C /usr/sbin/goodsync && \
+	mkdir -p /var/log/goodsync && \
+	echo $(curl -sI ${latest_goodsync} | awk '/Content-Length/ { print $2 }' | tr -d '\r') > /usr/sbin/goodsync/versionsize
 
 RUN \
 	apt-get install -y --no-install-recommends make perl cpanminus && \
@@ -66,9 +71,24 @@ RUN \
 
 # Install lsyncd: for watches a local directory trees. precise lsyncd is a little outdated
 RUN \
+	latest_lsyncd=http://de.archive.ubuntu.com/ubuntu/pool/universe/l/lsyncd/lsyncd_2.1.5-1_amd64.deb    && \
 	apt-get install -y --no-install-recommends liblua5.1-0 lua5.1 rsync && \
-	curl -o /var/tmp/lsyncd.deb http://de.archive.ubuntu.com/ubuntu/pool/universe/l/lsyncd/lsyncd_2.1.5-1_amd64.deb && \
-	dpkg -i /var/tmp/lsyncd.deb
+	curl -L -o /var/tmp/lsyncd.deb ${latest_lsyncd} && \
+	dpkg -i /var/tmp/lsyncd.deb && \
+	mkdir -p /var/log/lsyncd
+
+
+# Install msmtp: light SMTP client
+ADD conf/msmtprc /etc/
+## precise msmtp is a little outdated
+RUN \
+	latest_msmtp=http://ftp.de.debian.org/debian/pool/main/m/msmtp/msmtp_1.4.32-1_amd64.deb   && \
+	apt-get install -y --no-install-recommends libgsasl7 && \
+	curl -L -o /var/tmp/msmtp.deb ${latest_msmtp} && \
+	dpkg -x /var/tmp/msmtp.deb /tmp && \
+	install -o root -m 755 /tmp/usr/bin/msmtp /usr/bin/msmtp && \
+	chown root:root /etc/msmtprc && \
+	ln -s /usr/bin/msmtp /usr/sbin/sendmail
 
 
 # Create "nas" user
@@ -84,19 +104,9 @@ RUN \
 	sed -i '/^\(passwd\|group\|shadow\):/{ s/$/ extrausers/; }' /etc/nsswitch.conf
 
 
-# samba custom settings
-ADD conf/smb.conf /etc/samba/smb.conf
-ADD conf/smb.service /etc/avahi/services/smb.service
-
-# netatalk custom settings
-ADD conf/afp.conf /etc/netatalk/afp.conf
-ADD conf/afpd.service /etc/avahi/services/afpd.service
-RUN \
-	chown root:root /etc/netatalk/afp.conf /etc/samba/smb.conf -R /etc/avahi/services
-
 # create "shared" dir
 RUN \
-	shared_dir="srv/shared" && \
+	shared_dir="/srv/shared" && \
 	mkdir -p ${shared_dir} && \
 	chmod -R 775 ${shared_dir} && chown -R nas:nas ${shared_dir}
 
@@ -107,7 +117,8 @@ RUN \
 	chown root:root /etc/rc.local
 
 # create runit service´s
-ADD usr/avahi-daemon.sh /etc/service/avahi-daemon/run
+ADD usr/dbus.sh /etc/service/dbus/run
+ADD usr/avahi.sh /etc/service/avahi/run
 ADD usr/netatalk.sh /etc/service/netatalk/run
 ADD usr/smbd.sh /etc/service/smbd/run
 ADD usr/nmbd.sh /etc/service/nmbd/run
@@ -119,7 +130,8 @@ RUN \
 
 # pipework --wait
 RUN \
-	curl -o /usr/local/bin/pipework https://raw.github.com/jpetazzo/pipework/master/pipework && \
+	latest_pipework=https://raw.github.com/jpetazzo/pipework/master/pipework   && \
+	curl -L -o /usr/local/bin/pipework ${latest_pipework} && \
 	chmod a+x /usr/local/bin/pipework
 
 

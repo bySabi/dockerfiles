@@ -1,11 +1,9 @@
 # youtrack
-# VERSION 0.0.2
+# VERSION 0.0.3
 
-FROM bySabi/java
+FROM bysabi/java
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
-#ENV latest_youtrack_war http://download.jetbrains.com/charisma/youtrack-5.1.2.war
-ENV latest_youtrack_war http://192.168.0.29:8000/files/youtrack-5.1.2.war
 
 ENV WEBAPPS $JETTY_HOME/webapps
 #ENV WEBAPPS $TOMCAT_HOME/webapps
@@ -17,10 +15,11 @@ ENV JAVA_OPTIONS -XX:MaxPermSize=150M
 
 ## deploy youtrack war
 RUN \
+	latest_youtrack_war=http://download.jetbrains.com/charisma/youtrack-5.2-8723.war   && \
 	youtrackdir=$WEBAPPS/root && \
 :	'#youtrackdir=$WEBAPPS/ROOT' && \
 	mkdir -p ${youtrackdir} && \
-	curl -o ${youtrackdir}/youtrack.war ${latest_youtrack_war} && \
+	curl -L -o ${youtrackdir}/youtrack.war ${latest_youtrack_war} && \
 	cd ${youtrackdir}; $JAVA_HOME/bin/jar -xvf youtrack.war; rm youtrack.war && \
 	chown -R java:java ${youtrackdir}
 

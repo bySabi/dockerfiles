@@ -6,5 +6,7 @@
 # user integrity
 nas-user integrity
 
+# dbus
+[ ! -d /var/run/dbus ] && mkdir -p /var/run/dbus
 
 exit 0
