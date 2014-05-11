@@ -1,8 +1,11 @@
 # youtrack
-# VERSION 0.0.3
+# VERSION 0.0.4
 
 FROM bysabi/java
 MAINTAINER bySabi <flxinformatico@gmail.com>
+
+RUN \
+	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends
 
 
 ENV WEBAPPS $JETTY_HOME/webapps

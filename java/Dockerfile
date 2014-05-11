@@ -1,5 +1,5 @@
 # java
-# VERSION 0.0.5
+# VERSION 0.0.6
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -15,14 +15,12 @@ RUN \
 	dpkg-reconfigure -f noninteractive tzdata
 
 RUN \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
-	apt-get update 1>/dev/null && \
-	apt-get upgrade -y -q --no-install-recommends
+	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
+	apt-get install -y --no-install-recommends python-software-properties
 
+
+# Install ipsvd super server
 RUN \
-	apt-get install -y --no-install-recommends python-software-properties && \
-:	'## Install ipsvd super server' && \
 	apt-get install -y --no-install-recommends ipsvd
 
 

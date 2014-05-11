@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.1.6
+# VERSION 0.1.7
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -15,11 +15,9 @@ RUN \
 	dpkg-reconfigure -f noninteractive tzdata
 
 RUN \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
-	apt-get update 1>/dev/null && \
-	apt-get upgrade -y -q --no-install-recommends && \
+	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
 	apt-get install -y --no-install-recommends python-software-properties
+
 
 # Install ipsvd super server
 RUN \
@@ -30,7 +28,6 @@ RUN \
 ADD conf/samba4-pin-700 /etc/apt/preferences.d/
 ADD conf/sernet-samba-4.list /etc/apt/sources.list.d/
 RUN \
-	chown -R root:root /etc/apt/preferences.d /etc/apt/sources.list.d && \
 	curl -L -o /var/tmp/sernet-samba-keyring_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
 	dpkg -i /var/tmp/sernet-samba-keyring_all.deb && \
 	apt-get update 1>/dev/null && \
@@ -38,20 +35,22 @@ RUN \
 
 # samba custom settings
 ADD conf/smb.conf /etc/samba/smb.conf
-RUN chown root:root /etc/samba/smb.conf
 
 
 # Install avahi & netatalk from "ali-asad-lotia" ppa repository
 ADD conf/netatalk-pin-700 /etc/apt/preferences.d/
 RUN \
-	chown -R root:root /etc/apt/preferences.d && \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends netatalk avahi-daemon
 
 # netatalk custom settings
 ADD conf/afp.conf /etc/netatalk/afp.conf
-RUN chown root:root /etc/netatalk/afp.conf
+
+
+# Install nfs
+RUN \
+	apt-get install -y --no-install-recommends nfs-kernel-server
 
 
 # Install goodsync
@@ -82,12 +81,11 @@ RUN \
 ADD conf/msmtprc /etc/
 ## precise msmtp is a little outdated
 RUN \
-	latest_msmtp=http://ftp.de.debian.org/debian/pool/main/m/msmtp/msmtp_1.4.32-1_amd64.deb   && \
-	apt-get install -y --no-install-recommends libgsasl7 && \
+	latest_msmtp=http://ftp.de.debian.org/debian/pool/main/m/msmtp/msmtp_1.4.32-2_amd64.deb   && \
+	apt-get install -y --no-install-recommends libgnutls28 libgsasl7 && \
 	curl -L -o /var/tmp/msmtp.deb ${latest_msmtp} && \
 	dpkg -x /var/tmp/msmtp.deb /tmp && \
 	install -o root -m 755 /tmp/usr/bin/msmtp /usr/bin/msmtp && \
-	chown root:root /etc/msmtprc && \
 	ln -s /usr/bin/msmtp /usr/sbin/sendmail
 
 
@@ -99,7 +97,6 @@ RUN \
 ## user management tool
 ADD usr/nas-user /usr/local/bin/
 RUN \
-	chown root:root /usr/local/bin/nas-user && \
 	apt-get install -y --no-install-recommends libnss-extrausers && \
 	sed -i '/^\(passwd\|group\|shadow\):/{ s/$/ extrausers/; }' /etc/nsswitch.conf
 
@@ -113,8 +110,6 @@ RUN \
 
 # add init script. Include pipework check.
 ADD usr/rc.local /etc/rc.local
-RUN \
-	chown root:root /etc/rc.local
 
 # create runit service´s
 ADD usr/dbus.sh /etc/service/dbus/run
@@ -122,11 +117,13 @@ ADD usr/avahi.sh /etc/service/avahi/run
 ADD usr/netatalk.sh /etc/service/netatalk/run
 ADD usr/smbd.sh /etc/service/smbd/run
 ADD usr/nmbd.sh /etc/service/nmbd/run
-ADD usr/goodsync.sh /etc/service/goodsync/run
-ADD usr/sshd.sh /etc/service/sshd/run
+#ADD usr/goodsync.sh /etc/service/goodsync/run
+ADD usr/rpcbind.sh /etc/service/rpcbind/run
+ADD usr/nfsd.sh /etc/service/nfsd/run
+ADD usr/idmapd.sh /etc/service/idmapd/run
 ADD usr/lsyncd.sh /etc/service/lsyncd/run
-RUN \
-	chown root:root -R /etc/service
+ADD usr/sshd.sh /etc/service/sshd/run
+
 
 # pipework --wait
 RUN \

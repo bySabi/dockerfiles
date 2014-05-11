@@ -1,5 +1,5 @@
 # dnsmasq
-# VERSION 0.0.1
+# VERSION 0.0.2
 
 FROM phusion/baseimage:0.9.9
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -15,10 +15,7 @@ RUN \
 	dpkg-reconfigure -f noninteractive tzdata
 
 RUN \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise main universe > /etc/apt/sources.list && \
-	echo deb http://en.archive.ubuntu.com/ubuntu precise-updates main universe >> /etc/apt/sources.list && \
-	apt-get update 1>/dev/null && \
-	apt-get upgrade -y -q --no-install-recommends && \
+	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
 	apt-get install -y --no-install-recommends python-software-properties
 
 
@@ -30,8 +27,7 @@ RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 RUN \
 	apt-get install -y --no-install-recommends dnsmasq
 ADD conf/dnsmasq.conf /etc/dnsmasq.conf
-RUN \
-	chown root:root /etc/dnsmasq.conf
+
 
 # Install lsyncd: for watches a local directory trees. precise lsyncd is a little outdated
 RUN \
@@ -45,8 +41,6 @@ RUN \
 # create runit service´s
 ADD usr/dnsmasq.sh /etc/service/dnsmasq/run
 ADD usr/lsyncd.sh /etc/service/lsyncd/run
-RUN \
-	chown root:root -R /etc/service
 
 
 # Clean up APT when done.
