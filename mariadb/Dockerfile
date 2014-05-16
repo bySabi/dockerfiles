@@ -1,7 +1,7 @@
 # MariaDB
-# VERSION 0.0.6
+# VERSION 0.0.8
 
-FROM phusion/baseimage:0.9.9
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -16,7 +16,7 @@ RUN \
 
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
-	apt-get install -y --no-install-recommends python-software-properties
+	apt-get install -y --no-install-recommends software-properties-common
 
 
 # Disable SSH
@@ -26,7 +26,7 @@ RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 # Install MariaDB
 RUN \
 	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
-	add-apt-repository 'deb http://mirror.1000mbps.com/mariadb/repo/5.5/ubuntu precise main' && \
+	add-apt-repository 'deb http://mirror.1000mbps.com/mariadb/repo/5.5/ubuntu trusty main'   && \
 	apt-get update 1>/dev/null && \
 
 :	'# First that nothing create user mysql' && \

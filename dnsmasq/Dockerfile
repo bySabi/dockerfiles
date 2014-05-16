@@ -1,7 +1,7 @@
 # dnsmasq
-# VERSION 0.0.2
+# VERSION 0.0.3
 
-FROM phusion/baseimage:0.9.9
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -16,7 +16,7 @@ RUN \
 
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
-	apt-get install -y --no-install-recommends python-software-properties
+	apt-get install -y --no-install-recommends software-properties-common
 
 
 # Disable SSH
@@ -29,12 +29,9 @@ RUN \
 ADD conf/dnsmasq.conf /etc/dnsmasq.conf
 
 
-# Install lsyncd: for watches a local directory trees. precise lsyncd is a little outdated
+# Install lsyncd
 RUN \
-	latest_lsyncd=http://de.archive.ubuntu.com/ubuntu/pool/universe/l/lsyncd/lsyncd_2.1.5-1_amd64.deb    && \
-	apt-get install -y --no-install-recommends liblua5.1-0 lua5.1 rsync && \
-	curl -L -o /var/tmp/lsyncd.deb ${latest_lsyncd} && \
-	dpkg -i /var/tmp/lsyncd.deb && \
+	apt-get install -y --no-install-recommends lsyncd && \
 	mkdir -p /var/log/lsyncd
 
 

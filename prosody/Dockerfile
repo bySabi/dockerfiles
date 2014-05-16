@@ -1,7 +1,7 @@
 # prosody XMPP server
-# VERSION 0.0.1
+# VERSION 0.0.3
 
-FROM phusion/baseimage:0.9.9
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -16,12 +16,11 @@ RUN \
 
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
-	apt-get install -y --no-install-recommends python-software-properties
+	apt-get install -y --no-install-recommends software-properties-common
 
 
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
+# Disable SSH
+RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 
 # Install prosody
@@ -37,7 +36,6 @@ RUN \
 
 
 # create runit service´s
-ADD usr/sshd.sh /etc/service/sshd/run
 ADD usr/prosody.sh /etc/service/prosody/run
 
 

@@ -3,17 +3,12 @@
 # if BRIDGED wait for interface up
 [ ${BRIDGED} ] && pipework --wait
 
-# user integrity
-nas-user integrity
-
-# dbus
-mkdir -p /var/run/dbus
-
 # rpcbind
 mkdir -p /run/rpcbind
 
 # idmapd
 mkdir -p /run/rpc_pipefs/nfs
+mount -t rpc_pipefs rpc_pipefs /run/rpc_pipefs
 
 # rpc.nfsd
 rm /etc/exports && ln -s /srv/conf.d/nfs/exports /etc/exports

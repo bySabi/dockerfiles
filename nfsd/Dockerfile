@@ -1,7 +1,7 @@
-# bup
-# VERSION 0.0.2
+# nfs
+# VERSION 0.0.3
 
-FROM phusion/baseimage:0.9.9
+FROM phusion/baseimage:0.9.10
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -16,13 +16,12 @@ RUN \
 
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
-	apt-get install -y --no-install-recommends python-software-properties
+	apt-get install -y --no-install-recommends software-properties-common
 
 
 # Install ipsvd super server
 RUN \
 	apt-get install -y --no-install-recommends ipsvd
-
 
 
 # Install 

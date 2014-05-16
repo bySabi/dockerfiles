@@ -1,7 +1,7 @@
 # nas
-# VERSION 0.1.7
+# VERSION 0.2.0
 
-FROM phusion/baseimage:0.9.9
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -16,7 +16,7 @@ RUN \
 
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
-	apt-get install -y --no-install-recommends python-software-properties
+	apt-get install -y --no-install-recommends software-properties-common
 
 
 # Install ipsvd super server
@@ -32,8 +32,6 @@ RUN \
 	dpkg -i /var/tmp/sernet-samba-keyring_all.deb && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends samba
-
-# samba custom settings
 ADD conf/smb.conf /etc/samba/smb.conf
 
 
@@ -43,8 +41,6 @@ RUN \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends netatalk avahi-daemon
-
-# netatalk custom settings
 ADD conf/afp.conf /etc/netatalk/afp.conf
 
 
@@ -63,30 +59,21 @@ RUN \
 	echo $(curl -sI ${latest_goodsync} | awk '/Content-Length/ { print $2 }' | tr -d '\r') > /usr/sbin/goodsync/versionsize
 
 RUN \
-	apt-get install -y --no-install-recommends make perl cpanminus && \
+	apt-get install -y --no-install-recommends perl make cpanminus && \
 	cpanm --notest HTTP::Server::Simple::CGI && \
 	cpanm --notest Net::DNS::Nameserver
 
 
-# Install lsyncd: for watches a local directory trees. precise lsyncd is a little outdated
+# Install lsyncd & rsync
 RUN \
-	latest_lsyncd=http://de.archive.ubuntu.com/ubuntu/pool/universe/l/lsyncd/lsyncd_2.1.5-1_amd64.deb    && \
-	apt-get install -y --no-install-recommends liblua5.1-0 lua5.1 rsync && \
-	curl -L -o /var/tmp/lsyncd.deb ${latest_lsyncd} && \
-	dpkg -i /var/tmp/lsyncd.deb && \
+	apt-get install -y --no-install-recommends lsyncd && \
 	mkdir -p /var/log/lsyncd
 
 
 # Install msmtp: light SMTP client
-ADD conf/msmtprc /etc/
-## precise msmtp is a little outdated
 RUN \
-	latest_msmtp=http://ftp.de.debian.org/debian/pool/main/m/msmtp/msmtp_1.4.32-2_amd64.deb   && \
-	apt-get install -y --no-install-recommends libgnutls28 libgsasl7 && \
-	curl -L -o /var/tmp/msmtp.deb ${latest_msmtp} && \
-	dpkg -x /var/tmp/msmtp.deb /tmp && \
-	install -o root -m 755 /tmp/usr/bin/msmtp /usr/bin/msmtp && \
-	ln -s /usr/bin/msmtp /usr/sbin/sendmail
+	apt-get install -y --no-install-recommends msmtp
+ADD conf/msmtprc /etc/
 
 
 # Create "nas" user
