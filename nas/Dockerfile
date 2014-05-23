@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.2.0
+# VERSION 0.3.0
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -49,31 +49,15 @@ RUN \
 	apt-get install -y --no-install-recommends nfs-kernel-server
 
 
-# Install goodsync
+# Install rsync
 RUN \
-	latest_goodsync=http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz   && \
-	mkdir -p /usr/sbin/goodsync && \
-	curl -L -o /srv/goodsync.tar.gz ${latest_goodsync} && \
-	tar --strip-components=1 -xvf /srv/goodsync.tar.gz -C /usr/sbin/goodsync && \
-	mkdir -p /var/log/goodsync && \
-	echo $(curl -sI ${latest_goodsync} | awk '/Content-Length/ { print $2 }' | tr -d '\r') > /usr/sbin/goodsync/versionsize
-
-RUN \
-	apt-get install -y --no-install-recommends perl make cpanminus && \
-	cpanm --notest HTTP::Server::Simple::CGI && \
-	cpanm --notest Net::DNS::Nameserver
+	apt-get install -y --no-install-recommends rsync
 
 
-# Install lsyncd & rsync
+# Install lsyncd
 RUN \
 	apt-get install -y --no-install-recommends lsyncd && \
 	mkdir -p /var/log/lsyncd
-
-
-# Install msmtp: light SMTP client
-RUN \
-	apt-get install -y --no-install-recommends msmtp
-ADD conf/msmtprc /etc/
 
 
 # Create "nas" user
@@ -109,6 +93,7 @@ ADD usr/rpcbind.sh /etc/service/rpcbind/run
 ADD usr/nfsd.sh /etc/service/nfsd/run
 ADD usr/idmapd.sh /etc/service/idmapd/run
 ADD usr/lsyncd.sh /etc/service/lsyncd/run
+ADD usr/rsync.sh /etc/service/rsync/run
 ADD usr/sshd.sh /etc/service/sshd/run
 
 
