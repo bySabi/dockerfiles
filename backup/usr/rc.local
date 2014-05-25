@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# update tools
+nohup setup_tool update duplicity &
+nohup setup_tool update duply &
+nohup setup_tool update goodsync &
+
+exit 0

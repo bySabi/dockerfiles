@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# update tools
+nohup setup_tool update java &
+nohup setup_tool update jetty &
+nohup setup_tool update tomcat &
+#nohup setup_tool update youtrack &
+
+exit 0

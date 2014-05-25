@@ -1,0 +1,27 @@
+get_download_url() {
+	local latest_url=http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz
+	echo ${latest_url}
+}
+
+install_tool() {
+	mkdir -p /usr/sbin/goodsync
+	curl -L -o /srv/goodsync.tar.gz $(get_download_url)
+	tar --strip-components=1 --no-same-owner -xvf /srv/goodsync.tar.gz -C /usr/sbin/goodsync
+	mkdir -p /var/log/goodsync
+}
+
+update_tool() {
+	source /srv/conf.d/msmtprc/mail_head
+	local Subject="update_tool: goodsync"
+	local Body="
+		New update:
+
+		goodsync
+		
+	"
+	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+}
+
+get_version() {
+	echo $(curl -sI -L $(get_download_url) | awk '/Content-Length/ { print $2 }' | tr -d '\r')
+}

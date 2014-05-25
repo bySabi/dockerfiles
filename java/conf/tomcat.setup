@@ -1,0 +1,29 @@
+get_download_url() {
+	local mirror=http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7
+	local v=$(curl -s ${mirror}/ | grep -Po 'v(.*)/\"' | sed 's|/"||')
+	local tom=$(curl -s ${mirror}/${v}/bin/ | grep -Po 'apache-tomcat-(.*)[0-9].tar.gz\"' | sed 's|"||')
+	echo ${mirror}/${v}/bin/${tom}
+}
+
+install_tool() {
+	mkdir -p $CATALINA_HOME
+	curl -L -o /var/tmp/apache-tomcat.tar.gz $(get_download_url)
+	tar --strip-components=1 --no-same-owner -xvf /var/tmp/apache-tomcat.tar.gz -C $CATALINA_HOME
+	chown -R java:java $CATALINA_HOME && chown -R 775 $CATALINA_HOME/webapps
+}
+
+update_tool() {
+	source /srv/conf.d/msmtprc/mail_head
+	local Subject="update_tool: tomcat"
+	local Body="
+		New update:
+
+		tomcat
+		
+	"
+	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+}
+
+get_version() {
+	echo $(curl -sI -L $(get_download_url) | awk '/Content-Length/ { print $2 }' | tr -d '\r')
+}

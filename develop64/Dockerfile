@@ -19,10 +19,6 @@ RUN \
 	apt-get install -y --no-install-recommends software-properties-common
 
 
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
-
 RUN \
 	apt-get install -y bash-completion && \
 	apt-get install -y nano && \
@@ -33,10 +29,8 @@ RUN \
 
 ## Python virtual environment
 RUN \
-	apt-get install -y python && \
-
 	curl -L -O http://python-distribute.org/distribute_setup.py && \
-	python distribute_setup.py && \
+	python3 distribute_setup.py && \
 	easy_install pip && \
 
 	pip install virtualenv && \
@@ -49,7 +43,6 @@ ADD usr/git-crypt /usr/local/bin/
 # add init script
 ADD usr/rc.local /etc/rc.local
 
-ADD usr/sshd.sh /etc/service/sshd/run
 
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]

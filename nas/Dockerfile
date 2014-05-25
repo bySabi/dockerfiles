@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.3.0
+# VERSION 0.3.1
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -17,11 +17,6 @@ RUN \
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
 	apt-get install -y --no-install-recommends software-properties-common
-
-
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
 
 
 # Install samba4 from sernet enterprise repository https://portal.enterprisesamba.com/
@@ -88,13 +83,11 @@ ADD usr/avahi.sh /etc/service/avahi/run
 ADD usr/netatalk.sh /etc/service/netatalk/run
 ADD usr/smbd.sh /etc/service/smbd/run
 ADD usr/nmbd.sh /etc/service/nmbd/run
-#ADD usr/goodsync.sh /etc/service/goodsync/run
 ADD usr/rpcbind.sh /etc/service/rpcbind/run
 ADD usr/nfsd.sh /etc/service/nfsd/run
 ADD usr/idmapd.sh /etc/service/idmapd/run
 ADD usr/lsyncd.sh /etc/service/lsyncd/run
 ADD usr/rsync.sh /etc/service/rsync/run
-ADD usr/sshd.sh /etc/service/sshd/run
 
 
 # pipework --wait

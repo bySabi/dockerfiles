@@ -1,0 +1,29 @@
+get_download_url() {
+	local mirror=http://ftp.fau.de/eclipse/jetty/stable-9/dist
+	local eljetty=$(curl -s ${mirror}/ | iconv -f windows-1251 | tac | grep -m1 -Po 'jetty-distribution-(.*?).tar.gz"' | sed 's|"||' )
+	echo ${mirror}/${eljetty}
+}
+
+install_tool() {
+	mkdir -p $JETTY_HOME
+	curl -L -o /var/tmp/jetty.tar.gz $(get_download_url)
+	tar --strip-components=1 --no-same-owner -xvf /var/tmp/jetty.tar.gz -C $JETTY_HOME
+	rm -rf $JETTY_HOME/webapps.demo
+	chown -R java:java $JETTY_HOME && chown -R 775 $JETTY_HOME/webapps
+}
+
+update_tool() {
+	source /srv/conf.d/msmtprc/mail_head
+	local Subject="update_tool: jetty"
+	local Body="
+		New update:
+
+		jetty
+		
+	"
+	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+}
+
+get_version() {
+	echo $(curl -sI -L $(get_download_url) | awk '/Content-Length/ { print $2 }' | tr -d '\r')
+}

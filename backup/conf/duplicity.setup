@@ -1,0 +1,27 @@
+get_download_url() {
+	local latest_url=http://duplicity.nongnu.org/
+	echo $(curl -s ${latest_url} | iconv -f windows-1251 | grep -m1 -Po 'http://code.launchpad.net/duplicity/(.*?).tar.gz')
+}
+
+install_tool() {
+	curl -L -o /var/tmp/duplicity.tar.gz $(get_download_url)
+	mkdir -p /var/tmp/duplicity
+	tar --strip-components=1 --no-same-owner -xvf /var/tmp/duplicity.tar.gz -C /var/tmp/duplicity
+	cd /var/tmp/duplicity && python ./setup.py install
+}
+
+update_tool() {
+	source /srv/conf.d/msmtprc/mail_head
+	local Subject="update_tool: duplicity"
+	local Body="
+		New update:
+
+		duplicity
+		
+	"
+	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+}
+
+get_version() {
+	echo $(curl -sI -L $(get_download_url) | awk '/Content-Length/ { print $2 }' | tr -d '\r')
+}

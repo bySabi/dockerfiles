@@ -1,0 +1,27 @@
+get_download_url() {
+	local latest_url=http://duply.net/projects/ftplicity/files/latest/download/
+	echo ${latest_url}
+}
+
+install_tool() {
+	curl -L -o /var/tmp/duply.tar.gz $(get_download_url)
+	tar --strip-components=1 --no-same-owner -xvf /var/tmp/duply.tar.gz -C /var/tmp
+	install -o root -m 755 /var/tmp/duply /usr/local/bin/duply
+}
+
+update_tool() {
+	source /srv/conf.d/msmtprc/mail_head
+	local Subject="update_tool: duply"
+	local Body="
+		New update:
+
+		duply
+		
+	"
+	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+}
+
+get_version() {
+	local changelog=http://duply.net/?title=Duply-Changelog
+	echo $(curl -s ${changelog} | iconv -f windows-1251 | grep -m1 -Po 'Latest release is duply(.*)' | grep -Po '\d+(\.\d+)+')
+}

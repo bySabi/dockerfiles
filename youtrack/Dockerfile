@@ -1,5 +1,5 @@
 # youtrack
-# VERSION 0.0.4
+# VERSION 0.1.0
 
 FROM bysabi/java
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -17,15 +17,12 @@ ENV WEBAPPS $JETTY_HOME/webapps
 ENV JAVA_OPTIONS -XX:MaxPermSize=150M
 
 ## deploy youtrack war
-RUN \
-	latest_youtrack_war=http://download.jetbrains.com/charisma/youtrack-5.2-8723.war   && \
-	youtrackdir=$WEBAPPS/root && \
-:	'#youtrackdir=$WEBAPPS/ROOT' && \
-	mkdir -p ${youtrackdir} && \
-	curl -L -o ${youtrackdir}/youtrack.war ${latest_youtrack_war} && \
-	cd ${youtrackdir}; $JAVA_HOME/bin/jar -xvf youtrack.war; rm youtrack.war && \
-	chown -R java:java ${youtrackdir}
+ADD conf/youtrack.setup /var/tmp/
+RUN setup_tool install /var/tmp/youtrack.setup
 
+
+# add init script
+ADD usr/rc.local /etc/rc.local
 
 # enable runit service
 RUN mv /etc/service.disable/jetty /etc/service/jetty

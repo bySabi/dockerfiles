@@ -1,5 +1,5 @@
 # backup
-# VERSION 0.0.1
+# VERSION 0.0.2
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -24,6 +24,13 @@ RUN \
 	apt-get install -y --no-install-recommends ipsvd
 
 
+# setup_tool tools manager
+RUN \
+	latest_setup_tool=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
+	curl -L -o /usr/local/bin/setup_tool ${latest_setup_tool} && \
+	chmod a+x /usr/local/bin/setup_tool
+
+
 # Install development tools
 RUN \
 	apt-get install -y --no-install-recommends build-essential python python-dev && \
@@ -34,36 +41,23 @@ RUN \
 # Install duplicity
 RUN \
 	apt-get install -y --no-install-recommends librsync-dev rsync rdiff && \
-	pip install lockfile paramiko pycrypto urllib3 oauthlib boto python-swiftclient gdata && \
-
-	latest_duplicity=http://duplicity.nongnu.org/   && \
-	duplicity=$(curl -s ${latest_duplicity} | grep -m1 -Po 'http://code.launchpad.net/duplicity/(.*?).tar.gz') && \
-	curl -L -o /var/tmp/duplicity.tar.gz ${duplicity} && \
-	mkdir -p /var/tmp/duplicity && tar --strip-components=1 --no-same-owner -xvf /var/tmp/duplicity.tar.gz -C /var/tmp/duplicity && \
-	cd /var/tmp/duplicity && python ./setup.py install
+	pip install lockfile paramiko pycrypto urllib3 oauthlib boto python-swiftclient gdata
+ADD conf/duplicity.setup /var/tmp/
+RUN setup_tool install /var/tmp/duplicity.setup
 
 
 # Install duply
-RUN \
-	latest_duply=http://duply.net/projects/ftplicity/files/latest/download/   && \
-	curl -L -o /var/tmp/duply.tar.gz ${latest_duply} && \
-	tar --strip-components=1 --no-same-owner -xvf /var/tmp/duply.tar.gz -C /var/tmp && \
-	install -o root -m 755 /var/tmp/duply /usr/local/bin/duply
+ADD conf/duply.setup /var/tmp/
+RUN setup_tool install /var/tmp/duply.setup
 
 
 # Install goodsync
-RUN \
-	latest_goodsync=http://www.goodsync.com/download/goodsync-release-x86_64.tar.gz   && \
-	mkdir -p /usr/sbin/goodsync && \
-	curl -L -o /srv/goodsync.tar.gz ${latest_goodsync} && \
-	tar --strip-components=1 --no-same-owner -xvf /srv/goodsync.tar.gz -C /usr/sbin/goodsync && \
-	mkdir -p /var/log/goodsync && \
-	echo $(curl -sI ${latest_goodsync} | awk '/Content-Length/ { print $2 }' | tr -d '\r') > /usr/sbin/goodsync/versionsize
+ADD conf/goodsync.setup /var/tmp/
+RUN setup_tool install /var/tmp/goodsync.setup
 
 RUN \
 	apt-get install -y --no-install-recommends perl make cpanminus && \
-	cpanm --notest HTTP::Server::Simple::CGI && \
-	cpanm --notest Net::DNS::Nameserver
+	cpanm --notest HTTP::Server::Simple::CGI Net::DNS::Nameserver
 
 
 # Install msmtp: light SMTP client
@@ -71,6 +65,9 @@ RUN \
 	apt-get install -y --no-install-recommends msmtp
 ADD conf/msmtprc /etc/
 
+
+# add init script
+ADD usr/rc.local /etc/rc.local
 
 # create runit service´s
 ADD usr/sshd.sh /etc/service/sshd/run

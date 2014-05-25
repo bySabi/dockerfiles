@@ -1,5 +1,5 @@
 # java
-# VERSION 0.0.8
+# VERSION 0.1.0
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -24,45 +24,43 @@ RUN \
 	apt-get install -y --no-install-recommends ipsvd
 
 
+# setup_tool tools manager
+RUN \
+	latest_setup_tool=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
+	curl -L -o /usr/local/bin/setup_tool ${latest_setup_tool} && \
+	chmod a+x /usr/local/bin/setup_tool
+
+
 # Install oracle jre
 ENV JAVA_HOME /usr/lib/jvm/java-oracle
-RUN \
-	mkdir -p $JAVA_HOME && \
-	latest_jdk=http://download.oracle.com/otn-pub/java/jdk/8u5-b13/server-jre-8u5-linux-x64.tar.gz   && \
-	curl -L -C - -b "oraclelicense=accept-securebackup-cookie" -o /var/tmp/java.tar.gz ${latest_jdk} && \
-	tar --strip-components=1 --no-same-owner -xvf /var/tmp/java.tar.gz -C $JAVA_HOME && \
-	update-alternatives --install /usr/bin/java java $JAVA_HOME/bin/java 20000 && \
+ADD conf/java.setup /var/tmp/
+RUN setup_tool install /var/tmp/java.setup
 
+RUN \
 	useradd --create-home -U -s /bin/false -u 7777 java
 
 
-# Install latest Jetty
+# Install Jetty
 ENV JETTY_HOME /opt/jetty
-RUN \
-	mkdir -p $JETTY_HOME && \
-	mirror_jetty=http://ftp.fau.de/eclipse/jetty/stable-9/dist   && \
-	eljetty=$(curl -s ${mirror_jetty}/ | tac | grep -m1 -Po 'jetty-distribution-(.*?).tar.gz"' | sed 's|"||' ) && \
-	curl -L -o /var/tmp/jetty.tar.gz ${mirror_jetty}/${eljetty} && \
-	tar --strip-components=1 --no-same-owner -xvf /var/tmp/jetty.tar.gz -C $JETTY_HOME && \
-
-	rm -rf $JETTY_HOME/webapps.demo && \
-	chown -R java:java $JETTY_HOME && chown -R 775 $JETTY_HOME/webapps
+ADD conf/jetty.setup /var/tmp/
+RUN setup_tool install /var/tmp/jetty.setup
 
 
-# Install latest Tomcat
+# Install Tomcat
 ENV CATALINA_HOME /opt/tomcat
-RUN \
-	mkdir -p $CATALINA_HOME && \
-	mirror_tomcat=http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7   && \
-	v=$(curl -s ${mirror_tomcat}/ | tac | grep -m1 -Po 'v(.*)/"' | sed 's|"||') && \
-	tom=$(curl -s ${mirror_tomcat}/${v}/bin/ | grep -m1 -Po 'apache-tomcat-(.*?)[0-9].tar.gz') && \
-	tar --strip-components=1 --no-same-owner -xvf /var/tmp/apache-tomcat.tar.gz -C $CATALINA_HOME && \
+ADD conf/tomcat.setup /var/tmp/
+RUN setup_tool install /var/tmp/tomcat.setup
 
-	chown -R java:java $CATALINA_HOME && chown -R 775 $CATALINA_HOME/webapps
+
+# Install msmtp: light SMTP client
+RUN \
+	apt-get install -y --no-install-recommends msmtp
+ADD conf/msmtprc /etc/
 
 
 # create runit service
-ADD usr/sshd.sh /etc/service/sshd/run
+ADD usr/sshd.sh /etc/sshd/run
+
 ADD usr/jetty.sh /etc/service.disable/jetty/run
 ADD usr/tomcat.sh /etc/service.disable/tomcat/run
 
