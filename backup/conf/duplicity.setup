@@ -1,6 +1,6 @@
 get_download_url() {
 	local latest_url=http://duplicity.nongnu.org/
-	echo $(curl -s ${latest_url} | iconv -f windows-1251 | grep -m1 -Po 'http://code.launchpad.net/duplicity/(.*?).tar.gz')
+	echo $(curl -s ${latest_url} | iconv -f windows-1251 | grep -m 1 -Po 'http://code.launchpad.net/duplicity/(.*?).tar.gz')
 }
 
 install_tool() {

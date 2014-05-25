@@ -23,5 +23,5 @@ update_tool() {
 
 get_version() {
 	local changelog=http://duply.net/?title=Duply-Changelog
-	echo $(curl -s ${changelog} | iconv -f windows-1251 | grep -m1 -Po 'Latest release is duply(.*)' | grep -Po '\d+(\.\d+)+')
+	echo $(curl -s ${changelog} | iconv -f windows-1251 | grep -m 1 -Po 'Latest release is duply(.*)' | grep -Po '\d+(\.\d+)+')
 }

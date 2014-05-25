@@ -1,5 +1,7 @@
 get_download_url() {
-	local latest_url=http://download.jetbrains.com/charisma/youtrack-5.2-8723.war
+	local mirror=http://www.jetbrains.com/youtrack/download/download_thanks.jsp
+	local latest_url=$(curl -s --data "os=javaEE&pr=youtrack" ${mirror} | iconv -f windows-1251 | \
+		grep -m1 -Po 'http://(.*?)/charisma/youtrack-(.*?).war')
 	echo ${latest_url}
 }
 

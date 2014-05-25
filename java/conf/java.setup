@@ -1,6 +1,10 @@
 get_download_url() {
-	local latest_url=http://download.oracle.com/otn-pub/java/jdk/8u5-b13/server-jre-8u5-linux-x64.tar.gz
-	echo ${latest_url}
+	local mirror=http://www.oracle.com/technetwork/java/javase/downloads
+	local jdk_ver='server-jre8'
+#	local jdk_ver='jdk8'
+#	local jdk_ver='jdk7'
+	local download_page=$(curl -s ${mirror}/index.html | iconv -f windows-1251 | grep -m 1 -Po "${jdk_ver}-downloads-(.*?).html")
+	echo $(curl -s ${mirror}/${download_page} | iconv -f windows-1251 | grep -m 1 -Po "http://(.*?)-linux-x64.tar.gz")
 }
 
 install_tool() {
@@ -23,5 +27,5 @@ update_tool() {
 }
 
 get_version() {
-	echo $(curl -sI -L $(get_download_url) | awk '/Content-Length/ { print $2 }' | tr -d '\r')
+	echo $(curl -sI -L -C - -b "oraclelicense=accept-securebackup-cookie" $(get_download_url) | awk '/Content-Length/ { print $2 }' | tr -d '\r')
 }

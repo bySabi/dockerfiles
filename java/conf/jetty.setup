@@ -1,6 +1,6 @@
 get_download_url() {
 	local mirror=http://ftp.fau.de/eclipse/jetty/stable-9/dist
-	local eljetty=$(curl -s ${mirror}/ | iconv -f windows-1251 | tac | grep -m1 -Po 'jetty-distribution-(.*?).tar.gz"' | sed 's|"||' )
+	local eljetty=$(curl -s ${mirror}/ | iconv -f windows-1251 | tac | grep -m 1 -Po 'jetty-distribution-(.*?).tar.gz"' | sed 's|"||' )
 	echo ${mirror}/${eljetty}
 }
 
