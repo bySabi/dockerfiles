@@ -60,16 +60,28 @@ RUN \
 	cpanm --notest HTTP::Server::Simple::CGI Net::DNS::Nameserver
 
 
+# Install nfs client
+RUN \
+	apt-get install -y --no-install-recommends nfs-common
+
+
 # Install msmtp: light SMTP client
 RUN \
 	apt-get install -y --no-install-recommends msmtp
 ADD conf/msmtprc /etc/
 
 
+# Install lsyncd
+RUN \
+	apt-get install -y --no-install-recommends lsyncd && \
+	mkdir -p /var/log/lsyncd
+
+
 # add init script
 ADD usr/rc.local /etc/rc.local
 
 # create runit service´s
+ADD usr/lsyncd.sh /etc/service/lsyncd/run
 ADD usr/sshd.sh /etc/service/sshd/run
 
 

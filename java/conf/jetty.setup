@@ -1,6 +1,6 @@
 get_download_url() {
 	local mirror=http://ftp.fau.de/eclipse/jetty/stable-9/dist
-	local eljetty=$(curl -s ${mirror}/ | iconv -f windows-1251 | tac | grep -m 1 -Po 'jetty-distribution-(.*?).tar.gz"' | sed 's|"||' )
+	local eljetty=$(curl -s ${mirror}/ | iconv -f windows-1251 | tac | grep -m 1 -Po 'jetty-distribution-(.*).tar.gz"' | sed 's|"||' )
 	echo ${mirror}/${eljetty}
 }
 
@@ -10,18 +10,30 @@ install_tool() {
 	tar --strip-components=1 --no-same-owner -xvf /var/tmp/jetty.tar.gz -C $JETTY_HOME
 	rm -rf $JETTY_HOME/webapps.demo
 	chown -R java:java $JETTY_HOME && chown -R 775 $JETTY_HOME/webapps
+	rm -f /var/tmp/jetty.tar.gz
 }
 
 update_tool() {
-	source /srv/conf.d/msmtprc/mail_head
-	local Subject="update_tool: jetty"
-	local Body="
-		New update:
+	if isupdate; then
 
-		jetty
-		
-	"
-	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+		sv stop jetty
+		install_tool
+		sv start jetty
+	
+		source /srv/conf.d/msmtprc/mail_head
+		local Subject="autoupdate: jetty"
+		local Body="
+			autoupdate:
+
+			jetty
+
+		"
+		send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+
+		true
+	else
+		false
+	fi
 }
 
 get_version() {

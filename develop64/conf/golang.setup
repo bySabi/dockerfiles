@@ -1,0 +1,25 @@
+get_download_url() {
+	local mirror=https://code.google.com/p/go/wiki/Downloads?tm=2#Stable_releases
+	echo $(curl -s -L ${mirror} | iconv -f windows-1251 | grep -m 1 -Po 'https://([a-zA-Z.-]*/)*go([0-9]*\.)*linux-amd64.tar.gz')
+}
+
+install_tool() {
+	curl -L -o /tmp/go.tar.gz $(get_download_url)
+	tar -xvf /tmp/go.tar.gz -C /usr/local
+}
+
+update_tool() {
+	source /srv/conf.d/msmtprc/mail_head
+	local Subject="update_tool: golang"
+	local Body="
+		New update:
+
+		golang
+		
+	"
+	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+}
+
+get_version() {
+	echo $(curl -sI -L $(get_download_url) | awk '/Content-Length/ { print $2 }' | tr -d '\r')
+}

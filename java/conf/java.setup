@@ -12,18 +12,26 @@ install_tool() {
 	curl -L -C - -b "oraclelicense=accept-securebackup-cookie" -o /var/tmp/java.tar.gz $(get_download_url)
 	tar --strip-components=1 --no-same-owner -xvf /var/tmp/java.tar.gz -C $JAVA_HOME
 	update-alternatives --install /usr/bin/java java $JAVA_HOME/bin/java 20000
+	rm -f /var/tmp/java.tar.gz
 }
 
 update_tool() {
-	source /srv/conf.d/msmtprc/mail_head
-	local Subject="update_tool: java"
-	local Body="
-		New update:
+	if isupdate; then
 
-		java
-		
-	"
-	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+		source /srv/conf.d/msmtprc/mail_head
+		local Subject="New Update: java"
+		local Body="
+			New update:
+
+			java
+
+		"
+		send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+
+		true
+	else
+		false
+	fi
 }
 
 get_version() {

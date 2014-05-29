@@ -1,7 +1,7 @@
 get_download_url() {
 	local mirror=http://ftp.nluug.nl/internet/apache/tomcat/tomcat-7
-	local v=$(curl -s ${mirror}/ | grep -Po 'v(.*)/\"' | sed 's|/"||')
-	local tom=$(curl -s ${mirror}/${v}/bin/ | grep -Po 'apache-tomcat-(.*)[0-9].tar.gz\"' | sed 's|"||')
+	local v=$(curl -s ${mirror}/ | grep -m1 -Po 'v([0-9]*\.?)*' | head -n 1)
+	local tom=$(curl -s ${mirror}/${v}/bin/ | grep -Po 'apache-tomcat-([0-9]*\.?)*.tar.gz' | head -n 1)
 	echo ${mirror}/${v}/bin/${tom}
 }
 
@@ -10,18 +10,30 @@ install_tool() {
 	curl -L -o /var/tmp/apache-tomcat.tar.gz $(get_download_url)
 	tar --strip-components=1 --no-same-owner -xvf /var/tmp/apache-tomcat.tar.gz -C $CATALINA_HOME
 	chown -R java:java $CATALINA_HOME && chown -R 775 $CATALINA_HOME/webapps
+	rm -f /var/tmp/apache-tomcat.tar.gz
 }
 
 update_tool() {
-	source /srv/conf.d/msmtprc/mail_head
-	local Subject="update_tool: tomcat"
-	local Body="
-		New update:
+	if isupdate; then
 
-		tomcat
-		
-	"
-	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+		sv stop tomcat
+		install_tool
+		sv start tomcat
+
+		source /srv/conf.d/msmtprc/mail_head
+		local Subject="autoupdate: tomcat"
+		local Body="
+			autoupdate:
+
+			tomcat
+
+		"
+		send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+
+		true
+	else
+		false
+	fi
 }
 
 get_version() {

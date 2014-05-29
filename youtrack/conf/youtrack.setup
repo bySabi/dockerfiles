@@ -1,7 +1,7 @@
 get_download_url() {
 	local mirror=http://www.jetbrains.com/youtrack/download/download_thanks.jsp
 	local latest_url=$(curl -s --data "os=javaEE&pr=youtrack" ${mirror} | iconv -f windows-1251 | \
-		grep -m1 -Po 'http://(.*?)/charisma/youtrack-(.*?).war')
+		grep -m 1 -Po 'http://(.*?)/charisma/youtrack-(.*?).war')
 	echo ${latest_url}
 }
 
@@ -10,20 +10,27 @@ install_tool() {
 #	local youtrackdir=$WEBAPPS/ROOT
 	mkdir -p ${youtrackdir}
 	curl -L -o ${youtrackdir}/youtrack.war $(get_download_url)
-	cd ${youtrackdir}; $JAVA_HOME/bin/jar -xvf youtrack.war; rm youtrack.war
+	cd ${youtrackdir} && $JAVA_HOME/bin/jar -xvf youtrack.war && rm youtrack.war
 	chown -R java:java ${youtrackdir}
 }
 
 update_tool() {
-	source /srv/conf.d/msmtprc/mail_head
-	local Subject="update_tool: youtrack"
-	local Body="
-		New update:
+	if isupdate; then
 
-		youtrack
-		
-	"
-	send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+		source /srv/conf.d/msmtprc/mail_head
+		local Subject="New Update: youtrack"
+		local Body="
+			New update:
+
+			youtrack
+
+		"
+		send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+
+		true
+	else
+		false
+	fi
 }
 
 get_version() {
