@@ -13,15 +13,15 @@ mkdir -p /var/run/dbus
 ## rpcbind
 mkdir -p /run/rpcbind
 
-## idmapd
-mkdir -p /run/rpc_pipefs/nfs
-mount -t rpc_pipefs rpc_pipefs /run/rpc_pipefs
-
 ## rpc.nfsd
-rm /etc/exports && ln -s /srv/conf.d/nfs/exports /etc/exports
+ln -s /srv/conf.d/nfs/exports /etc/exports
+
 # debug nfsd https://www.serverstack.com/blog/2012/11/21/debugging-nfs-file-access-on-server-and-client-side/
 ## rpcdebug -m nfsd -s proc && tail -f /var/log/messages
 # share´s: showmount -e localhost
+
+# custom rc.local
+[ -f /srv/conf.d/rc.local ] && nohup /srv/conf.d/rc.local &
 
 
 exit 0

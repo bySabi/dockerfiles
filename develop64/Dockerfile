@@ -1,5 +1,5 @@
 # develop 64 bits
-# VERSION 0.0.2
+# VERSION 0.0.3
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -21,8 +21,8 @@ RUN \
 
 # setup_tool tools manager
 RUN \
-	latest_setup_tool=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
-	curl -L -o /usr/local/bin/setup_tool ${latest_setup_tool} && \
+	latest_url=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
+	curl -L -o /usr/local/bin/setup_tool ${latest_url} && \
 	chmod a+x /usr/local/bin/setup_tool
 
 
@@ -46,14 +46,14 @@ RUN \
 
 # Install golang
 ENV GOPATH /root/develop/go
-ADD conf/golang.setup /var/tmp/
+ADD conf/golang.setup /var/tmp/golang.setup
 RUN setup_tool install /var/tmp/golang.setup
 
 
 # Install git-crypt
 RUN \
-	latest_gitcrypt=https://github.com/bySabi/git-crypt/raw/build/build/git-crypt   && \
-	curl -L -o /usr/local/bin/git-crypt ${latest_gitcrypt} && \
+	latest_url=https://github.com/bySabi/git-crypt/raw/build/build/git-crypt   && \
+	curl -L -o /usr/local/bin/git-crypt ${latest_url} && \
 	chmod a+x /usr/local/bin/git-crypt
 
 

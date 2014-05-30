@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.3.1
+# VERSION 0.3.2
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -20,8 +20,8 @@ RUN \
 
 
 # Install samba4 from sernet enterprise repository https://portal.enterprisesamba.com/
-ADD conf/samba4-pin-700 /etc/apt/preferences.d/
-ADD conf/sernet-samba-4.list /etc/apt/sources.list.d/
+ADD conf/samba4-pin-700 /etc/apt/preferences.d/samba4-pin-700
+ADD conf/sernet-samba-4.list /etc/apt/sources.list.d/sernet-samba-4.list
 RUN \
 	curl -L -o /var/tmp/sernet-samba-keyring_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
 	dpkg -i /var/tmp/sernet-samba-keyring_all.deb && \
@@ -31,7 +31,7 @@ ADD conf/smb.conf /etc/samba/smb.conf
 
 
 # Install avahi & netatalk from "ali-asad-lotia" ppa repository
-ADD conf/netatalk-pin-700 /etc/apt/preferences.d/
+ADD conf/netatalk-pin-700 /etc/apt/preferences.d/netatalk-pin-700
 RUN \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
 	apt-get update 1>/dev/null && \
@@ -41,7 +41,11 @@ ADD conf/afp.conf /etc/netatalk/afp.conf
 
 # Install nfs
 RUN \
-	apt-get install -y --no-install-recommends nfs-kernel-server
+	apt-get install -y --no-install-recommends nfs-kernel-server && \
+	rm /etc/exports && \
+	mkdir -p /var/lib/nfs/rpc_pipefs && \
+	echo "rpc_pipefs	/var/lib/nfs/rpc_pipefs	rpc_pipefs	defaults	0	0" >> /etc/fstab && \
+	echo "nfsd	/proc/fs/nfsd	nfsd	defaults	0	0" >> /etc/fstab
 
 
 # Install rsync
@@ -61,7 +65,7 @@ RUN \
 
 # Enable "extra" users, this makes overlaying our passwd/shadow/group content easier
 ## user management tool
-ADD usr/nas-user /usr/local/bin/
+ADD usr/nas-user /usr/local/bin/nas-user
 RUN \
 	apt-get install -y --no-install-recommends libnss-extrausers && \
 	sed -i '/^\(passwd\|group\|shadow\):/{ s/$/ extrausers/; }' /etc/nsswitch.conf
@@ -92,8 +96,8 @@ ADD usr/rsync.sh /etc/service/rsync/run
 
 # pipework --wait
 RUN \
-	latest_pipework=https://raw.github.com/jpetazzo/pipework/master/pipework   && \
-	curl -L -o /usr/local/bin/pipework ${latest_pipework} && \
+	latest_url=https://raw.github.com/jpetazzo/pipework/master/pipework   && \
+	curl -L -o /usr/local/bin/pipework ${latest_url} && \
 	chmod a+x /usr/local/bin/pipework
 
 

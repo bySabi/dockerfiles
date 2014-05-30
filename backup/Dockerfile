@@ -1,5 +1,5 @@
 # backup
-# VERSION 0.0.2
+# VERSION 0.0.3
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -26,8 +26,8 @@ RUN \
 
 # setup_tool tools manager
 RUN \
-	latest_setup_tool=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
-	curl -L -o /usr/local/bin/setup_tool ${latest_setup_tool} && \
+	latest_url=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
+	curl -L -o /usr/local/bin/setup_tool ${latest_url} && \
 	chmod a+x /usr/local/bin/setup_tool
 
 
@@ -42,17 +42,17 @@ RUN \
 RUN \
 	apt-get install -y --no-install-recommends librsync-dev rsync rdiff && \
 	pip install lockfile paramiko pycrypto urllib3 oauthlib boto python-swiftclient gdata
-ADD conf/duplicity.setup /var/tmp/
+ADD conf/duplicity.setup /var/tmp/duplicity.setup
 RUN setup_tool install /var/tmp/duplicity.setup
 
 
 # Install duply
-ADD conf/duply.setup /var/tmp/
+ADD conf/duply.setup /var/tmp/duply.setup
 RUN setup_tool install /var/tmp/duply.setup
 
 
 # Install goodsync
-ADD conf/goodsync.setup /var/tmp/
+ADD conf/goodsync.setup /var/tmp/goodsync.setup
 RUN setup_tool install /var/tmp/goodsync.setup
 
 RUN \
@@ -64,11 +64,17 @@ RUN \
 RUN \
 	apt-get install -y --no-install-recommends nfs-common
 
+# install nfs_automount
+RUN \
+	latest_url=https://raw.githubusercontent.com/vwal/nfs_automount/master/nfs_automount   && \
+	curl -L -o /usr/local/bin/nfs_automount ${latest_url} && \
+	chmod a+x /usr/local/bin/nfs_automount
+
 
 # Install msmtp: light SMTP client
 RUN \
 	apt-get install -y --no-install-recommends msmtp
-ADD conf/msmtprc /etc/
+ADD conf/msmtprc /etc/msmtprc
 
 
 # Install lsyncd
@@ -81,6 +87,7 @@ RUN \
 ADD usr/rc.local /etc/rc.local
 
 # create runit service´s
+ADD usr/nfs_automount.sh /etc/service/nfs_automount/run
 ADD usr/lsyncd.sh /etc/service/lsyncd/run
 ADD usr/sshd.sh /etc/service/sshd/run
 

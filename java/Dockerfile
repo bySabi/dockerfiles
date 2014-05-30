@@ -1,5 +1,5 @@
 # java
-# VERSION 0.1.0
+# VERSION 0.1.1
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -26,14 +26,14 @@ RUN \
 
 # setup_tool tools manager
 RUN \
-	latest_setup_tool=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
-	curl -L -o /usr/local/bin/setup_tool ${latest_setup_tool} && \
+	latest_url=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
+	curl -L -o /usr/local/bin/setup_tool ${latest_url} && \
 	chmod a+x /usr/local/bin/setup_tool
 
 
-# Install oracle jre
+# Install oracle Java
 ENV JAVA_HOME /usr/lib/jvm/java-oracle
-ADD conf/java.setup /var/tmp/
+ADD conf/java.setup /var/tmp/java.setup
 RUN setup_tool install /var/tmp/java.setup
 
 RUN \
@@ -42,20 +42,20 @@ RUN \
 
 # Install Jetty
 ENV JETTY_HOME /opt/jetty
-ADD conf/jetty.setup /var/tmp/
+ADD conf/jetty.setup /var/tmp/jetty.setup
 RUN setup_tool install /var/tmp/jetty.setup
 
 
 # Install Tomcat
 ENV CATALINA_HOME /opt/tomcat
-ADD conf/tomcat.setup /var/tmp/
+ADD conf/tomcat.setup /var/tmp/tomcat.setup
 RUN setup_tool install /var/tmp/tomcat.setup
 
 
 # Install msmtp: light SMTP client
 RUN \
 	apt-get install -y --no-install-recommends msmtp
-ADD conf/msmtprc /etc/
+ADD conf/msmtprc /etc/msmtprc
 
 
 # create runit service

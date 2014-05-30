@@ -5,4 +5,12 @@ nohup setup_tool update duplicity &
 nohup setup_tool update duply &
 nohup setup_tool update goodsync &
 
+# nfs_automount
+## https://github.com/vwal/nfs_automount
+ln -s /srv/conf.d/nfs/nfs_automount.conf /etc/nfs_automount.conf
+
+# custom rc.local
+[ -f /srv/conf.d/rc.local ] && nohup /srv/conf.d/rc.local &
+
+
 exit 0

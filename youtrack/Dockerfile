@@ -1,5 +1,5 @@
 # youtrack
-# VERSION 0.1.0
+# VERSION 0.1.1
 
 FROM bysabi/java
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -17,7 +17,7 @@ ENV WEBAPPS $JETTY_HOME/webapps
 ENV JAVA_OPTIONS -XX:MaxPermSize=150M
 
 ## deploy youtrack war
-ADD conf/youtrack.setup /var/tmp/
+ADD conf/youtrack.setup /var/tmp/youtrack.setup
 RUN setup_tool install /var/tmp/youtrack.setup
 
 
