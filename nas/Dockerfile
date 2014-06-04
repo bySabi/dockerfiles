@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.3.2
+# VERSION 0.4.1
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -19,8 +19,16 @@ RUN \
 	apt-get install -y --no-install-recommends software-properties-common
 
 
+# setup_tool tools manager
+RUN \
+	latest_url=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
+	curl -L -o /usr/local/bin/setup_tool ${latest_url} && \
+	chmod a+x /usr/local/bin/setup_tool
+
+
+## NAS
+
 # Install samba4 from sernet enterprise repository https://portal.enterprisesamba.com/
-ADD conf/samba4-pin-700 /etc/apt/preferences.d/samba4-pin-700
 ADD conf/sernet-samba-4.list /etc/apt/sources.list.d/sernet-samba-4.list
 RUN \
 	curl -L -o /var/tmp/sernet-samba-keyring_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
@@ -31,7 +39,6 @@ ADD conf/smb.conf /etc/samba/smb.conf
 
 
 # Install avahi & netatalk from "ali-asad-lotia" ppa repository
-ADD conf/netatalk-pin-700 /etc/apt/preferences.d/netatalk-pin-700
 RUN \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
 	apt-get update 1>/dev/null && \
@@ -43,20 +50,14 @@ ADD conf/afp.conf /etc/netatalk/afp.conf
 RUN \
 	apt-get install -y --no-install-recommends nfs-kernel-server && \
 	rm /etc/exports && \
-	mkdir -p /var/lib/nfs/rpc_pipefs && \
-	echo "rpc_pipefs	/var/lib/nfs/rpc_pipefs	rpc_pipefs	defaults	0	0" >> /etc/fstab && \
+	mkdir -p /run/rpc_pipefs && \
+	echo "rpc_pipefs	/run/rpc_pipefs	rpc_pipefs	defaults	0	0" >> /etc/fstab && \
 	echo "nfsd	/proc/fs/nfsd	nfsd	defaults	0	0" >> /etc/fstab
 
 
 # Install rsync
 RUN \
 	apt-get install -y --no-install-recommends rsync
-
-
-# Install lsyncd
-RUN \
-	apt-get install -y --no-install-recommends lsyncd && \
-	mkdir -p /var/log/lsyncd
 
 
 # Create "nas" user
@@ -76,6 +77,34 @@ RUN \
 	shared_dir="/srv/shared" && \
 	mkdir -p ${shared_dir} && \
 	chmod -R 775 ${shared_dir} && chown -R nas:nas ${shared_dir}
+
+
+## BACKUP
+
+# Install goodsync
+ADD conf/goodsync.setup /var/tmp/goodsync.setup
+RUN setup_tool install /var/tmp/goodsync.setup
+
+RUN \
+	apt-get install -y --no-install-recommends perl make cpanminus && \
+	cpanm --notest HTTP::Server::Simple::CGI Net::DNS::Nameserver
+
+
+# Install msmtp: light SMTP client
+RUN \
+	apt-get install -y --no-install-recommends msmtp
+ADD conf/msmtprc /etc/msmtprc
+
+
+# Install lsyncd
+RUN \
+	apt-get install -y --no-install-recommends lsyncd && \
+	mkdir -p /var/log/lsyncd
+
+
+# Install ipsvd super server
+RUN \
+	apt-get install -y --no-install-recommends ipsvd
 
 
 # add init script. Include pipework check.

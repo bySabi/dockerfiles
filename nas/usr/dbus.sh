@@ -1,3 +1,5 @@
 #!/bin/sh
+set +e
 
-exec /bin/dbus-daemon --system
+rm /var/run/dbus/pid
+exec /bin/dbus-daemon --system --nofork

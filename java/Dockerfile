@@ -1,5 +1,5 @@
 # java
-# VERSION 0.1.1
+# VERSION 0.1.2
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -17,11 +17,6 @@ RUN \
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
 	apt-get install -y --no-install-recommends software-properties-common
-
-
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
 
 
 # setup_tool tools manager
@@ -56,6 +51,11 @@ RUN setup_tool install /var/tmp/tomcat.setup
 RUN \
 	apt-get install -y --no-install-recommends msmtp
 ADD conf/msmtprc /etc/msmtprc
+
+
+# Install ipsvd super server
+RUN \
+	apt-get install -y --no-install-recommends ipsvd
 
 
 # create runit service

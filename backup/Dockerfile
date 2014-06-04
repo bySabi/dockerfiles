@@ -1,5 +1,5 @@
 # backup
-# VERSION 0.0.3
+# VERSION 0.1.1
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -17,11 +17,6 @@ RUN \
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
 	apt-get install -y --no-install-recommends software-properties-common
-
-
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
 
 
 # setup_tool tools manager
@@ -51,15 +46,6 @@ ADD conf/duply.setup /var/tmp/duply.setup
 RUN setup_tool install /var/tmp/duply.setup
 
 
-# Install goodsync
-ADD conf/goodsync.setup /var/tmp/goodsync.setup
-RUN setup_tool install /var/tmp/goodsync.setup
-
-RUN \
-	apt-get install -y --no-install-recommends perl make cpanminus && \
-	cpanm --notest HTTP::Server::Simple::CGI Net::DNS::Nameserver
-
-
 # Install nfs client
 RUN \
 	apt-get install -y --no-install-recommends nfs-common
@@ -81,6 +67,11 @@ ADD conf/msmtprc /etc/msmtprc
 RUN \
 	apt-get install -y --no-install-recommends lsyncd && \
 	mkdir -p /var/log/lsyncd
+
+
+# Install ipsvd super server
+RUN \
+	apt-get install -y --no-install-recommends ipsvd
 
 
 # add init script

@@ -1,5 +1,5 @@
 # nginx and php5
-# VERSION 0.0.9
+# VERSION 0.1.0
 
 FROM phusion/baseimage:0.9.10
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -17,11 +17,6 @@ RUN \
 RUN \
 	apt-get update 1>/dev/null && apt-get upgrade -y -q --no-install-recommends && \
 	apt-get install -y --no-install-recommends software-properties-common
-
-
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
 
 
 # Install php5-fpm
@@ -60,6 +55,11 @@ RUN \
 	sed -i -e 's/include \+sites-enabled.*/include \/srv\/conf.d\/nginx\/sites-enabled\/\*;/' /etc/nginx/nginx.conf && \
 	sed -i -e 's/error_log \+logs\/.*/error_log  \/var\/log\/nginx\/error.log warn;/' /etc/nginx/nginx.conf && \
 	sed -i -e 's/access_log \+logs\/.*/access_log  \/var\/log\/nginx\/access.log main;/' /etc/nginx/nginx.conf
+
+
+# Install ipsvd super server
+RUN \
+	apt-get install -y --no-install-recommends ipsvd
 
 
 # create runit service´s
