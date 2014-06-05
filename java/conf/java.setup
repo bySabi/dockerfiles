@@ -18,12 +18,15 @@ install_tool() {
 update_tool() {
 	if isupdate; then
 
-		source /srv/conf.d/msmtprc/mail_head
+		source /srv/conf.d/msmtp/mail_head
 		local Subject="New Update: java"
 		local Body="
+Content-Type: text/plain; charset=UTF-8
+
 			New update:
 
 			java
+			at: $(date +"%c")
 
 		"
 		send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"

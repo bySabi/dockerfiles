@@ -1,7 +1,7 @@
 # nginx and php5
-# VERSION 0.1.0
+# VERSION 0.1.1
 
-FROM phusion/baseimage:0.9.10
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -28,7 +28,7 @@ RUN \
 	sed -i -e 's/;daemonize =.*/daemonize = no/' /etc/php5/fpm/php-fpm.conf
 
 # Install nginx
-ADD conf/nginx-stable-pin-700 /etc/apt/preferences.d/nginx-stable-pin-700
+#ADD conf/nginx-stable-pin-700 /etc/apt/preferences.d/nginx-stable-pin-700
 RUN \
 	add-apt-repository -y ppa:nginx/stable && \
 	apt-get update 1>/dev/null && \

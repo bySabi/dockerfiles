@@ -20,12 +20,15 @@ update_tool() {
 		install_tool
 		sv start jetty
 	
-		source /srv/conf.d/msmtprc/mail_head
+		source /srv/conf.d/msmtp/mail_head
 		local Subject="autoupdate: jetty"
 		local Body="
+Content-Type: text/plain; charset=UTF-8
+
 			autoupdate:
 
 			jetty
+			at: $(date +"%c")
 
 		"
 		send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"

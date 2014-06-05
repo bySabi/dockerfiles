@@ -1,5 +1,5 @@
 # java
-# VERSION 0.1.2
+# VERSION 0.1.3
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -49,8 +49,9 @@ RUN setup_tool install /var/tmp/tomcat.setup
 
 # Install msmtp: light SMTP client
 RUN \
-	apt-get install -y --no-install-recommends msmtp
-ADD conf/msmtprc /etc/msmtprc
+	apt-get install -y --no-install-recommends msmtp && \
+	ln -s /usr/bin/msmtp /usr/sbin/sendmail && \
+	ln -s /srv/conf.d/msmtp/msmtprc /etc/msmtprc
 
 
 # Install ipsvd super server

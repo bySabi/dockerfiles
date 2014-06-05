@@ -1,5 +1,5 @@
 # develop 64 bits
-# VERSION 0.0.3
+# VERSION 0.0.4
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -36,8 +36,8 @@ RUN \
 
 ## Python 3 virtual environment
 RUN \
-	curl -L -O http://python-distribute.org/distribute_setup.py && \
-	python3 distribute_setup.py && \
+	curl -L -o /var/tmp/distribute_setup.py http://python-distribute.org/distribute_setup.py && \
+	python3 /var/tmp/distribute_setup.py && \
 	easy_install pip && \
 
 	pip install virtualenv && \

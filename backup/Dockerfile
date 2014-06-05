@@ -1,5 +1,5 @@
 # backup
-# VERSION 0.1.1
+# VERSION 0.1.2
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -29,8 +29,9 @@ RUN \
 # Install development tools
 RUN \
 	apt-get install -y --no-install-recommends build-essential python python-dev && \
-	curl -L -O http://python-distribute.org/distribute_setup.py && \
-	python distribute_setup.py && easy_install pip
+	curl -L -o /var/tmp/distribute_setup.py http://python-distribute.org/distribute_setup.py && \
+	python /var/tmp/distribute_setup.py && \
+	easy_install pip
 
 
 # Install duplicity
@@ -50,23 +51,31 @@ RUN setup_tool install /var/tmp/duply.setup
 RUN \
 	apt-get install -y --no-install-recommends nfs-common
 
-# install nfs_automount
+# install nfs_automount: https://github.com/vwal/nfs_automount
 RUN \
 	latest_url=https://raw.githubusercontent.com/vwal/nfs_automount/master/nfs_automount   && \
 	curl -L -o /usr/local/bin/nfs_automount ${latest_url} && \
-	chmod a+x /usr/local/bin/nfs_automount
+	chmod a+x /usr/local/bin/nfs_automount && \
+	ln -s /srv/conf.d/nfs/nfs_automount.conf /etc/nfs_automount.conf
+
+
+# install silence-unless-failed from silence-unless-failed
+RUN \
+	latest_url=https://raw.githubusercontent.com/phusion/phusion-server-tools/master/silence-unless-failed   && \
+	curl -L -o /usr/local/bin/silence-unless-failed ${latest_url} && \
+	chmod a+x /usr/local/bin/silence-unless-failed
 
 
 # Install msmtp: light SMTP client
 RUN \
-	apt-get install -y --no-install-recommends msmtp
-ADD conf/msmtprc /etc/msmtprc
+	apt-get install -y --no-install-recommends msmtp && \
+	ln -s /usr/bin/msmtp /usr/sbin/sendmail && \
+	ln -s /srv/conf.d/msmtp/msmtprc /etc/msmtprc
 
 
 # Install lsyncd
 RUN \
-	apt-get install -y --no-install-recommends lsyncd && \
-	mkdir -p /var/log/lsyncd
+	apt-get install -y --no-install-recommends lsyncd
 
 
 # Install ipsvd super server

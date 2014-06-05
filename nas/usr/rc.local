@@ -18,15 +18,16 @@ mkdir -p /var/run/dbus
 ## rpcbind
 mkdir -p /run/rpcbind
 
-## rpc.nfsd
-ln -s /srv/conf.d/nfs/exports /etc/exports
-
 ## rpc.idmapd
 mkdir -p /run/rpc_pipefs/nfs
 
 # debug nfsd https://www.serverstack.com/blog/2012/11/21/debugging-nfs-file-access-on-server-and-client-side/
 ## rpcdebug -m nfsd -s proc && tail -f /var/log/messages
 # share´s: showmount -e localhost
+
+# goodsync
+ln -s /srv/conf.d/goodsync $HOME/.goodsync
+
 
 # update tools
 nohup setup_tool update goodsync &

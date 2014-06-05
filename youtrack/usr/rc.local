@@ -1,4 +1,9 @@
 #!/bin/sh
+set +e ## ignore errors
+
+# custom rc.local
+/srv/conf.d/rc.local
+
 
 # update tools
 nohup setup_tool update java &

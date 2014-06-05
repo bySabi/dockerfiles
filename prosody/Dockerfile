@@ -1,5 +1,5 @@
 # prosody XMPP server
-# VERSION 0.0.3
+# VERSION 0.0.4
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -19,10 +19,6 @@ RUN \
 	apt-get install -y --no-install-recommends software-properties-common
 
 
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
-
-
 # Install prosody
 RUN \
 	apt-get install -y prosody && \
@@ -34,6 +30,9 @@ RUN \
 	sed -i -e 's/Include \+\"conf.*/Include \"\/srv\/conf.d\/prosody\/conf.d\/\*.cfg.lua\";/' /etc/prosody/prosody.cfg.lua && \
 	sed -i -e 's/daemonize \+=.*/daemonize = false;/' /etc/prosody/prosody.cfg.lua
 
+
+# Disable SSH
+RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 # create runit service´s
 ADD usr/prosody.sh /etc/service/prosody/run

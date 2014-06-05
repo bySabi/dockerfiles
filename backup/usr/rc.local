@@ -4,15 +4,15 @@ set +e ## ignore errors
 # custom rc.local
 /srv/conf.d/rc.local
 
+# duplicity & duply
+mkdir -p /tmp/cache
+ln -s /tmp/cache $HOME/.cache
+ln -s /srv/conf.d/duply $HOME/.duply
+
 
 # update tools on backgroud
 nohup setup_tool update duplicity &
 nohup setup_tool update duply &
-
-
-# nfs_automount
-## https://github.com/vwal/nfs_automount
-ln -s /srv/conf.d/nfs/nfs_automount.conf /etc/nfs_automount.conf
 
 
 exit 0

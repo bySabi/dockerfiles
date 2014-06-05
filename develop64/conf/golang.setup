@@ -15,12 +15,15 @@ update_tool() {
 	if isupdate; then
 		install_tool
 
-		source /srv/conf.d/msmtprc/mail_head
+		source /srv/conf.d/msmtp/mail_head
 		local Subject="autoupdate: golang"
 		local Body="
+Content-Type: text/plain; charset=UTF-8
+
 			autoupdate:
 
 			golang
+			at: $(date +"%c")
 
 		"
 		send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"

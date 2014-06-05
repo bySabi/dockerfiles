@@ -1,5 +1,5 @@
 # MariaDB
-# VERSION 0.0.8
+# VERSION 0.0.9
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -19,10 +19,6 @@ RUN \
 	apt-get install -y --no-install-recommends software-properties-common
 
 
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
-
-
 # Install MariaDB
 RUN \
 	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
@@ -35,9 +31,9 @@ RUN \
 :	'# cleanup' && \
 	rm -r /var/lib/mysql
 
-# set a custom my.cnf
-ADD conf/my.cnf /etc/mysql/my.cnf
 
+# Disable SSH
+RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 # add init script. Include mariadb setup
 ADD usr/rc.local /etc/rc.local

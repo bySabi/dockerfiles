@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.4.1
+# VERSION 0.4.2
 
 FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -50,6 +50,7 @@ ADD conf/afp.conf /etc/netatalk/afp.conf
 RUN \
 	apt-get install -y --no-install-recommends nfs-kernel-server && \
 	rm /etc/exports && \
+	ln -s /srv/conf.d/nfs/exports /etc/exports && \
 	mkdir -p /run/rpc_pipefs && \
 	echo "rpc_pipefs	/run/rpc_pipefs	rpc_pipefs	defaults	0	0" >> /etc/fstab && \
 	echo "nfsd	/proc/fs/nfsd	nfsd	defaults	0	0" >> /etc/fstab
@@ -90,16 +91,23 @@ RUN \
 	cpanm --notest HTTP::Server::Simple::CGI Net::DNS::Nameserver
 
 
+# install silence-unless-failed from silence-unless-failed
+RUN \
+	latest_url=https://raw.githubusercontent.com/phusion/phusion-server-tools/master/silence-unless-failed   && \
+	curl -L -o /usr/local/bin/silence-unless-failed ${latest_url} && \
+	chmod a+x /usr/local/bin/silence-unless-failed
+
+
 # Install msmtp: light SMTP client
 RUN \
-	apt-get install -y --no-install-recommends msmtp
-ADD conf/msmtprc /etc/msmtprc
+	apt-get install -y --no-install-recommends msmtp && \
+	ln -s /usr/bin/msmtp /usr/sbin/sendmail && \
+	ln -s /srv/conf.d/msmtp/msmtprc /etc/msmtprc
 
 
 # Install lsyncd
 RUN \
-	apt-get install -y --no-install-recommends lsyncd && \
-	mkdir -p /var/log/lsyncd
+	apt-get install -y --no-install-recommends lsyncd
 
 
 # Install ipsvd super server
