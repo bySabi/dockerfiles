@@ -18,7 +18,6 @@ update_tool() {
 		source /srv/conf.d/msmtp/mail_head
 		local Subject="autoupdate: golang"
 		local Body="
-Content-Type: text/plain; charset=UTF-8
 
 			autoupdate:
 
