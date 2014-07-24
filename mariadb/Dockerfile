@@ -1,7 +1,7 @@
 # MariaDB
-# VERSION 0.0.9
+# VERSION 0.1.0
 
-FROM phusion/baseimage:latest
+FROM phusion/baseimage:0.9.12
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 

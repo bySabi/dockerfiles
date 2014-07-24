@@ -1,7 +1,7 @@
 # backup
-# VERSION 0.1.2
+# VERSION 0.1.3
 
-FROM phusion/baseimage:latest
+FROM phusion/baseimage:0.9.12
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -68,8 +68,7 @@ RUN \
 
 # Install msmtp: light SMTP client
 RUN \
-	apt-get install -y --no-install-recommends msmtp && \
-	ln -s /usr/bin/msmtp /usr/sbin/sendmail && \
+	apt-get install -y --no-install-recommends msmtp msmtp-mta && \
 	ln -s /srv/conf.d/msmtp/msmtprc /etc/msmtprc
 
 

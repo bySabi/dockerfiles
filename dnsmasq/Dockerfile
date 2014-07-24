@@ -1,7 +1,7 @@
 # dnsmasq
 # VERSION 0.0.4
 
-FROM phusion/baseimage:latest
+FROM phusion/baseimage:0.9.12
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 

@@ -1,7 +1,7 @@
 # mosquitto
-# VERSION 0.0.1
+# VERSION 0.0.2
 
-FROM phusion/baseimage:latest
+FROM phusion/baseimage:0.9.12
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 # Set correct environment variables.
