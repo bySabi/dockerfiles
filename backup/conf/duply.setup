@@ -1,5 +1,6 @@
 get_download_url() {
-	local latest_url=http://duply.net/projects/ftplicity/files/latest/download/
+#	local latest_url=http://duply.net/projects/ftplicity/files/latest/download/
+	local latest_url="http://sourceforge.net/projects/ftplicity/files/latest/download?source=files"          
 	echo ${latest_url}
 }
 
