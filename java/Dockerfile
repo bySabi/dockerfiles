@@ -1,7 +1,7 @@
 # java
 # VERSION 0.1.5
 
-FROM phusion/baseimage:0.9.12
+FROM phusion/baseimage:0.9.13
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 

@@ -1,0 +1,6 @@
+#!/bin/sh
+set +e ## ignore errors
+
+echo $HOME > /root/home
+
+exit 0
