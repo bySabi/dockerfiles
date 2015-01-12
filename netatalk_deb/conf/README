@@ -1,0 +1,40 @@
+#!/bin/bash
+
+Read this:
+# http://netatalk.sourceforge.net/wiki/index.php/Install_Netatalk_3.1.7_on_Ubuntu_14.10_Utopic
+# http://netatalk.sourceforge.net/3.1/htmldocs/installation.html#idp139639181227600
+
+# clone master branch
+git clone https://github.com/Netatalk/Netatalk.git
+
+# bootstrap
+cd Netatalk
+./bootstrap
+
+
+# configure: FULL
+./configure \
+	--with-init-style=debian-sysv \
+	--without-libevent \
+	--without-tdb \
+	--with-cracklib \
+	--enable-krbV-uam \
+	--with-pam-confdir=/etc/pam.d \
+	--with-dbus-sysconf-dir=/etc/dbus-1/system.d \
+	--with-tracker-pkgconfig-version=0.16
+
+
+# configure: MINIMAL
+./configure \
+	--with-init-style=debian-sysv \
+	--without-libevent \
+	--without-tdb \
+	--without-dtrace \
+	--without-kerberos \
+	--without-tracker \
+	--disable-tcp-wrappers \
+	--with-cracklib \
+	--with-pam-confdir=/etc/pam.d
+ 
+
+ 

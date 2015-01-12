@@ -1,13 +1,22 @@
 #!/bin/sh
+set +e ## ignore errors
 
+# custom rc.local
+/srv/conf.d/rc.local
+
+# prevent incorrect user
 DATADIR=/srv/conf.d/mariadb/mysql
+mkdir -p ${DATADIR}
+chown -R mysql.mysql ${DATADIR}
+
 [ "$(ls -A ${DATADIR} 2>/dev/null)" ] || {
-	mkdir -p ${DATADIR}
-	chown -R mysql.mysql ${DATADIR}
-	# Set datadir
+	# Set datadir and initialize DB
 	mysql_install_db --user=mysql --datadir=${DATADIR}
-	# Set user/password admin and grant login from everywhere
-#	echo "GRANT ALL ON *.* TO admin@'%' IDENTIFIED BY 'admin' WITH GRANT OPTION; FLUSH PRIVILEGES" | mysql
+	
+	# First time CLI
+	# Set user/password: admin/admin
+	# and grant login from everywhere
+	# $ echo "GRANT ALL ON *.* TO admin@'%' IDENTIFIED BY 'admin' WITH GRANT OPTION; FLUSH PRIVILEGES" | mysql
 }
 
 exit 0

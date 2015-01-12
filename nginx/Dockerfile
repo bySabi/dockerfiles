@@ -1,7 +1,7 @@
 # nginx and php5
-# VERSION 0.1.2
+# VERSION 0.1.3
 
-FROM phusion/baseimage:0.9.12
+FROM phusion/baseimage:0.9.15
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 

@@ -1,0 +1,48 @@
+get_download_url() {
+	local latest_url=http://download.redis.io/redis-stable.tar.gz
+	echo ${latest_url}
+}
+
+install_tool() {
+	local tool_install_dir=/var/tmp/redis
+	local redis_dir=/srv/conf.d/redis
+	mkdir -p ${tool_install_dir}
+	curl -L -o ${tool_install_dir}/redis.tar.gz $(get_download_url)
+	tar --strip-components=1 --no-same-owner -xvf ${tool_install_dir}/redis.tar.gz -C ${tool_install_dir}
+	cd ${tool_install_dir} && make && make install
+	cp -f src/redis-sentinel /usr/local/bin
+	## Default settings, rewrite mount /src/conf.d/redis volume
+	mkdir -p ${redis_dir}/data && cp -f *.conf ${redis_dir}
+	sed 's/^# unixsocket /unixsocket /' -i ${redis_dir}/redis.conf
+	sed 's/^# unixsocketperm 700/unixsocketperm 777/' -i ${redis_dir}/redis.conf
+	sed '/^logfile/d' -i ${redis_dir}/redis.conf
+	sed 's/^\(dir .*\)$/# \1\ndir \/srv\/conf.d\/redis\/data/' -i ${redis_dir}/redis.conf
+#	sed -e "\$ainclude \/srv\/conf.d\/redis\/redis.conf" -i ${redis_dir}/redis.conf	
+	rm -fr ${tool_install_dir}
+}
+
+update_tool() {
+	if isupdate; then
+		install_tool
+
+		source /srv/conf.d/msmtp/mail_head
+		local Subject="autoupdate: redis"
+		local Body="
+
+			autoupdate:
+
+			redis
+			at: $(date +"%c")
+
+		"
+		send_mail "${mail_To}" "${mail_From}" "${Subject}" "${Body}"
+
+		true
+	else
+		false
+	fi
+}
+
+get_version() {
+	echo $(curl -sI -L $(get_download_url) | awk '/Content-Length/ { print $2 }' | tr -d '\r')
+}

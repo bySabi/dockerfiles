@@ -9,10 +9,12 @@ mkdir -p /tmp/cache
 ln -s /tmp/cache $HOME/.cache
 ln -s /srv/conf.d/duply $HOME/.duply
 
+# goodsync
+ln -s /srv/conf.d/goodsync $HOME/.goodsync
 
 # update tools on backgroud
-#nohup setup_tool update duplicity &
-#nohup setup_tool update duply &
-
+nohup setup_tool update duplicity &
+nohup setup_tool update duply &
+nohup setup_tool update goodsync &
 
 exit 0

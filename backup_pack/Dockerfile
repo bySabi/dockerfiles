@@ -1,4 +1,4 @@
-# backup
+# backup_pack only
 # VERSION 0.1.4
 
 FROM phusion/baseimage:0.9.15
@@ -29,36 +29,30 @@ RUN \
 # Install development tools
 RUN \
 	apt-get install -y --no-install-recommends build-essential python python-dev && \
-	curl -L -o /var/tmp/ez_setup.py https://bootstrap.pypa.io/ez_setup.py && \
-	python /var/tmp/ez_setup.py && \
+	curl -L -o /var/tmp/distribute_setup.py http://python-distribute.org/distribute_setup.py && \
+	python /var/tmp/distribute_setup.py && \
 	easy_install pip
 
+
 # Install duplicity
-#RUN \
-#	add-apt-repository -y ppa:duplicity-team/ppa && \
-#	apt-get update 1>/dev/null && \
-#	apt-get install -y --no-install-recommends duplicity
 RUN \
 	apt-get install -y --no-install-recommends librsync-dev rsync rdiff && \
 	pip install lockfile paramiko pycrypto urllib3 oauthlib boto python-swiftclient gdata
 ADD conf/duplicity.setup /var/tmp/duplicity.setup
 RUN setup_tool install /var/tmp/duplicity.setup
 
+
 # Install duply
 ADD conf/duply.setup /var/tmp/duply.setup
 RUN setup_tool install /var/tmp/duply.setup
 
+# Install goodsync
+ADD conf/goodsync.setup /var/tmp/goodsync.setup
+RUN setup_tool install /var/tmp/goodsync.setup
 
-# Install nfs client
 RUN \
-	apt-get install -y --no-install-recommends nfs-common
-
-# install nfs_automount: https://github.com/vwal/nfs_automount
-RUN \
-	latest_url=https://raw.githubusercontent.com/vwal/nfs_automount/master/nfs_automount   && \
-	curl -L -o /usr/local/bin/nfs_automount ${latest_url} && \
-	chmod a+x /usr/local/bin/nfs_automount && \
-	ln -s /srv/conf.d/nfs/nfs_automount.conf /etc/nfs_automount.conf
+	apt-get install -y --no-install-recommends perl make cpanminus && \
+	cpanm --notest HTTP::Server::Simple::CGI Net::DNS::Nameserver
 
 
 # install silence-unless-failed from silence-unless-failed
@@ -75,8 +69,8 @@ RUN \
 
 
 # Install lsyncd
-RUN \
-	apt-get install -y --no-install-recommends lsyncd
+#RUN \
+#	apt-get install -y --no-install-recommends lsyncd
 
 
 # Install ipsvd super server
@@ -88,8 +82,8 @@ RUN \
 ADD usr/rc.local /etc/rc.local
 
 # create runit service´s
-ADD usr/nfs_automount.sh /etc/service/nfs_automount/run
-ADD usr/lsyncd.sh /etc/service/lsyncd/run
+#ADD usr/nfs_automount.sh /etc/service/nfs_automount/run
+#ADD usr/lsyncd.sh /etc/service/lsyncd/run
 ADD usr/sshd.sh /etc/service/sshd/run
 
 

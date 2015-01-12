@@ -1,7 +1,7 @@
 get_download_url() {
 	local mirror=http://www.jetbrains.com/youtrack/download/download_thanks.jsp
-	local latest_url=$(curl -s --data "os=javaEE&pr=youtrack" ${mirror} | iconv -f windows-1251 | \
-		grep -m 1 -Po 'http://(.*?)/charisma/youtrack-(.*?).war')
+	local latest_url=$(curl -s --data "os=zip&pr=youtrack" ${mirror} | iconv -f windows-1251 | \
+		grep -m 1 -Po 'http://(.*?)/charisma/youtrack-(.*?).zip')		
 	echo ${latest_url}
 }
 
@@ -9,8 +9,9 @@ install_tool() {
 	local youtrackdir=$WEBAPPS/root
 #	local youtrackdir=$WEBAPPS/ROOT
 	mkdir -p ${youtrackdir}
-	curl -L -o ${youtrackdir}/youtrack.war $(get_download_url)
-	cd ${youtrackdir} && $JAVA_HOME/bin/jar -xvf youtrack.war && rm youtrack.war
+	curl -L -o ${youtrackdir}/youtrack.zip $(get_download_url)
+#	cd ${youtrackdir} && $JAVA_HOME/bin/jar -xvf youtrack.war && rm youtrack.war
+	cd ${youtrackdir} && tar --strip-components=1 --no-same-owner -xvf youtrack.zip && rm youtrack.zip
 	chown -R java:java ${youtrackdir}
 }
 

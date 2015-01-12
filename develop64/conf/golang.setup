@@ -1,5 +1,5 @@
 get_download_url() {
-	local mirror=https://code.google.com/p/go/wiki/Downloads?tm=2#Stable_releases
+	local mirror=https://golang.org/dl/
 	echo $(curl -s -L ${mirror} | iconv -f windows-1251 | grep -m 1 -Po 'https://([a-zA-Z.-]*/)*go([0-9]*\.)*linux-amd64.tar.gz')
 }
 

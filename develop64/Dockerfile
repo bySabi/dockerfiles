@@ -1,7 +1,7 @@
 # develop 64 bits
-# VERSION 0.0.4
+# VERSION 0.0.6
 
-FROM phusion/baseimage:0.9.12
+FROM phusion/baseimage:0.9.15
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -30,14 +30,14 @@ ENV PATH /root/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin
 RUN \
 	apt-get install -y --no-install-recommends nano mc bash-completion && \
 
-	apt-get install -y build-essential && \
+	apt-get install -y build-essential autoconf libtool && \
 	apt-get install -y mercurial git subversion
 
 
 ## Python 3 virtual environment
 RUN \
-	curl -L -o /var/tmp/distribute_setup.py http://python-distribute.org/distribute_setup.py && \
-	python3 /var/tmp/distribute_setup.py && \
+	curl -L -o /var/tmp/ez_setup.py https://bootstrap.pypa.io/ez_setup.py && \
+	python3 /var/tmp/ez_setup.py && \
 	easy_install pip && \
 
 	pip install virtualenv && \
@@ -45,9 +45,9 @@ RUN \
 
 
 # Install golang
-ENV GOPATH /root/develop/go
-ADD conf/golang.setup /var/tmp/golang.setup
-RUN setup_tool install /var/tmp/golang.setup
+#ENV GOPATH /root/develop/go
+#ADD conf/golang.setup /var/tmp/golang.setup
+#RUN setup_tool install /var/tmp/golang.setup
 
 
 # Install git-crypt

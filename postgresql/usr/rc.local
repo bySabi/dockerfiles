@@ -1,0 +1,22 @@
+#!/bin/sh
+set +e ## ignore errors
+
+# custom rc.local
+/srv/conf.d/rc.local
+
+# prevent incorrect user
+DATADIR=/srv/conf.d/postgresql
+mkdir -p ${DATADIR}
+chown -R postgres.postgres ${DATADIR}
+chmod -R 700 ${DATADIR}
+
+[ "$(ls -A ${DATADIR}/data 2>/dev/null)" ] || {
+	# Initialize DB
+	exec setuser postgres /usr/lib/postgresql/current/bin/initdb -D ${DATADIR}/data
+	
+	# First time CLI
+	# Set password for default user: postgres/postgres
+	# $ setuser postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+}
+
+exit 0

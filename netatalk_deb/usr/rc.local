@@ -1,0 +1,8 @@
+#!/bin/sh
+set +e ## ignore errors
+
+# custom rc.local
+/srv/conf.d/rc.local
+
+
+exit 0

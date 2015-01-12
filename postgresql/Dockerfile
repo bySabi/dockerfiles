@@ -1,5 +1,5 @@
-# MariaDB
-# VERSION 0.1.1
+# PostgreSQL
+# VERSION 0.0.1
 
 FROM phusion/baseimage:0.9.15
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -19,27 +19,29 @@ RUN \
 	apt-get install -y --no-install-recommends software-properties-common
 
 
-# Install MariaDB
+# Install PostgreSQL
+ENV PG_VERSION 9.4
 RUN \
-	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
-	add-apt-repository 'deb http://mirror.1000mbps.com/mariadb/repo/5.5/ubuntu trusty main'   && \
+	apt-key adv --keyserver pgp.mit.edu --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8 && \
+	add-apt-repository 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'   && \
 	apt-get update 1>/dev/null && \
 
-:	'# First that nothing create user mysql' && \
-	useradd -M -U -s /bin/false -u 7777 mysql && \
-	apt-get install -q -y --no-install-recommends mariadb-server && \
-:	'# cleanup' && \
-	rm -r /var/lib/mysql
-
+:	'# First that nothing create user postgres' && \
+	useradd -M -U -s /bin/false -u 7777 postgres && \
+	apt-get install -q -y --no-install-recommends postgresql-common && \
+	sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf && \
+	apt-get install -q -y --no-install-recommends postgresql-$PG_VERSION postgresql-contrib-$PG_VERSION && \
+	ln -s /usr/lib/postgresql/$PG_VERSION /usr/lib/postgresql/current && \
+	/etc/init.d/postgresql stop
 
 # Disable SSH
 RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 
-# add init script. Include mariadb setup
+# add init script. Include postgresql setup
 ADD usr/rc.local /etc/rc.local
 
 # create runit service´s
-ADD usr/mariadb.sh /etc/service/mariadb/run
+ADD usr/postgresql.sh /etc/service/postgresql/run
 
 
 # Clean up APT when done.

@@ -1,7 +1,7 @@
 # nas
-# VERSION 0.5.0
+# VERSION 0.5.1
 
-FROM phusion/baseimage:0.9.12
+FROM phusion/baseimage:0.9.15
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 

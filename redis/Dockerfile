@@ -1,5 +1,5 @@
-# java
-# VERSION 0.1.6
+# Redis
+# VERSION 0.0.1
 
 FROM phusion/baseimage:0.9.15
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -26,43 +26,34 @@ RUN \
 	chmod a+x /usr/local/bin/setup_tool
 
 
-# Install oracle Java
-ENV JAVA_HOME /usr/lib/jvm/java-oracle
-ADD conf/java.setup /var/tmp/java.setup
-RUN setup_tool install /var/tmp/java.setup
-
+# Install Redis
+ADD conf/redis.setup /var/tmp/redis.setup
 RUN \
-	useradd --create-home -U -s /bin/false -u 7777 java
+: '# First that nothing create user redis' && \
+	useradd -M -U -s /bin/false -u 7777 redis && \
+	apt-get install -y --no-install-recommends gcc libc6-dev make && \
+	setup_tool install /var/tmp/redis.setup && \
+	apt-get purge -y --auto-remove gcc libc6-dev make
 
-
-# Install Jetty
-ENV JETTY_HOME /opt/jetty
-ADD conf/jetty.setup /var/tmp/jetty.setup
-RUN setup_tool install /var/tmp/jetty.setup
-
-
-# Install Tomcat
-ENV CATALINA_HOME /opt/tomcat
-ADD conf/tomcat.setup /var/tmp/tomcat.setup
-RUN setup_tool install /var/tmp/tomcat.setup
-
+# install silence-unless-failed from silence-unless-failed
+RUN \
+	latest_url=https://raw.githubusercontent.com/phusion/phusion-server-tools/master/silence-unless-failed && \
+	curl -L -o /usr/local/bin/silence-unless-failed ${latest_url} && \
+	chmod a+x /usr/local/bin/silence-unless-failed
 
 # Install msmtp: light SMTP client
 RUN \
 	apt-get install -y --no-install-recommends msmtp msmtp-mta && \
 	ln -s /srv/conf.d/msmtp/msmtprc /etc/msmtprc
 
+# Disable SSH
+RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
+# add init script.
+ADD usr/rc.local /etc/rc.local
 
-
-# create runit service
-ADD usr/sshd.sh /etc/sshd/run
-
-ADD usr/jetty.sh /etc/service.disable/jetty/run
-ADD usr/tomcat.sh /etc/service.disable/tomcat/run
+# create runit service´s
+ADD usr/redis.sh /etc/service/redis/run
 
 
 # Clean up APT when done.

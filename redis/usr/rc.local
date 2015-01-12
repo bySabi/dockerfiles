@@ -1,0 +1,16 @@
+#!/bin/sh
+set +e ## ignore errors
+
+# custom rc.local
+/srv/conf.d/rc.local
+
+# prevent incorrect user
+DATADIR=/srv/conf.d/redis/data
+chown -R redis.redis ${DATADIR}
+
+# update tools
+# nohup setup_tool update redis &
+
+
+
+exit 0
