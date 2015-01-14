@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
-	<name replace-wildcards="yes">%h</name>
+	<name replace-wildcards="yes">%h_smb</name>
 	<service>
 		<type>_smb._tcp</type>
 		<port>445</port>

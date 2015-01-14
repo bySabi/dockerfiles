@@ -1,5 +1,5 @@
 # nas
-# VERSION 0.5.1
+# VERSION 0.5.3
 
 FROM phusion/baseimage:0.9.15
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -38,12 +38,17 @@ RUN \
 ADD conf/smb.conf /etc/samba/smb.conf
 
 
-# Install avahi & netatalk from "ali-asad-lotia" ppa repository
+# Install avahi & netatalk from ppa repository
+# CAUTION!!! Don´t use other repository than "ali-asad-lotia"
 RUN \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends netatalk avahi-daemon
 ADD conf/afp.conf /etc/netatalk/afp.conf
+
+# Add avahi services
+ADD conf/afpd.service /etc/avahi/services/afpd.service
+#ADD conf/smbd.service /etc/avahi/services/smbd.service
 
 
 # Install nfs
