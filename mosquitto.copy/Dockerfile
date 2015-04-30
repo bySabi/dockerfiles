@@ -1,7 +1,7 @@
 # mosquitto
-# VERSION 0.0.2
+# VERSION 0.0.3
 
-FROM phusion/baseimage:0.9.12
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 # Set correct environment variables.
@@ -13,7 +13,7 @@ RUN \
 	echo "Europe/Madrid" > /etc/timezone && \
 	dpkg-reconfigure -f noninteractive tzdata
 
-ADD usr/rc.local /etc/rc.local
+COPY usr/rc.local /etc/rc.local
 
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]

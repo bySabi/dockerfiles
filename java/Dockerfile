@@ -1,7 +1,7 @@
 # java
-# VERSION 0.1.6
+# VERSION 0.1.8
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -28,7 +28,7 @@ RUN \
 
 # Install oracle Java
 ENV JAVA_HOME /usr/lib/jvm/java-oracle
-ADD conf/java.setup /var/tmp/java.setup
+COPY conf/java.setup /var/tmp/java.setup
 RUN setup_tool install /var/tmp/java.setup
 
 RUN \
@@ -43,7 +43,7 @@ RUN setup_tool install /var/tmp/jetty.setup
 
 # Install Tomcat
 ENV CATALINA_HOME /opt/tomcat
-ADD conf/tomcat.setup /var/tmp/tomcat.setup
+COPY conf/tomcat.setup /var/tmp/tomcat.setup
 RUN setup_tool install /var/tmp/tomcat.setup
 
 
@@ -53,17 +53,12 @@ RUN \
 	ln -s /srv/conf.d/msmtp/msmtprc /etc/msmtprc
 
 
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
-
-
 # create runit service
-ADD usr/sshd.sh /etc/sshd/run
+COPY usr/jetty.sh /etc/service.disable/jetty/run
+COPY usr/tomcat.sh /etc/service.disable/tomcat/run
 
-ADD usr/jetty.sh /etc/service.disable/jetty/run
-ADD usr/tomcat.sh /etc/service.disable/tomcat/run
-
+# enable SSH
+RUN rm -f /etc/service/sshd/down
 
 # Clean up APT when done.
 RUN \

@@ -1,7 +1,7 @@
 # nginx and php5
-# VERSION 0.1.3
+# VERSION 0.1.4
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -57,16 +57,12 @@ RUN \
 	sed -i -e 's/access_log \+logs\/.*/access_log  \/var\/log\/nginx\/access.log main;/' /etc/nginx/nginx.conf
 
 
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
-
-
 # create runit service´s
-ADD usr/sshd.sh /etc/service/sshd/run
-ADD usr/php5-fpm.sh /etc/service/php5-fpm/run
-ADD usr/nginx.sh /etc/service/nginx/run
+COPY usr/php5-fpm.sh /etc/service/php5-fpm/run
+COPY usr/nginx.sh /etc/service/nginx/run
 
+# enable SSH
+RUN rm -f /etc/service/sshd/down
 
 # Clean up APT when done.
 RUN \

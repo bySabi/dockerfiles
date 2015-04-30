@@ -1,7 +1,7 @@
 # backup
-# VERSION 0.1.4
+# VERSION 0.2.1
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -34,18 +34,18 @@ RUN \
 	easy_install pip
 
 # Install duplicity
-#RUN \
-#	add-apt-repository -y ppa:duplicity-team/ppa && \
-#	apt-get update 1>/dev/null && \
-#	apt-get install -y --no-install-recommends duplicity
 RUN \
-	apt-get install -y --no-install-recommends librsync-dev rsync rdiff && \
-	pip install lockfile paramiko pycrypto urllib3 oauthlib boto python-swiftclient gdata
-ADD conf/duplicity.setup /var/tmp/duplicity.setup
-RUN setup_tool install /var/tmp/duplicity.setup
+	add-apt-repository -y ppa:duplicity-team/ppa && \
+	apt-get update 1>/dev/null && \
+	apt-get install -y --no-install-recommends duplicity
+#RUN \
+#	apt-get install -y --no-install-recommends librsync-dev rsync rdiff && \
+#	pip install lockfile paramiko pycrypto urllib3 oauthlib boto python-swiftclient gdata
+#COPY conf/duplicity.setup /var/tmp/duplicity.setup
+#RUN setup_tool install /var/tmp/duplicity.setup
 
 # Install duply
-ADD conf/duply.setup /var/tmp/duply.setup
+COPY conf/duply.setup /var/tmp/duply.setup
 RUN setup_tool install /var/tmp/duply.setup
 
 
@@ -79,19 +79,15 @@ RUN \
 	apt-get install -y --no-install-recommends lsyncd
 
 
-# Install ipsvd super server
-RUN \
-	apt-get install -y --no-install-recommends ipsvd
-
-
 # add init script
-ADD usr/rc.local /etc/rc.local
+COPY usr/rc.local /etc/rc.local
 
 # create runit service´s
-ADD usr/nfs_automount.sh /etc/service/nfs_automount/run
-ADD usr/lsyncd.sh /etc/service/lsyncd/run
-ADD usr/sshd.sh /etc/service/sshd/run
+COPY usr/nfs_automount.sh /etc/service/nfs_automount/run
+COPY usr/lsyncd.sh /etc/service/lsyncd/run
 
+# enable SSH
+RUN rm -f /etc/service/sshd/down
 
 # Clean up APT when done.
 RUN \
@@ -101,3 +97,4 @@ RUN \
 
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
+

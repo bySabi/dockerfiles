@@ -1,7 +1,7 @@
 # dnsmasq
-# VERSION 0.0.5
+# VERSION 0.1.0
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -29,12 +29,9 @@ RUN \
 	apt-get install -y --no-install-recommends lsyncd
 
 
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
-
 # create runit service´s
-ADD usr/dnsmasq.sh /etc/service/dnsmasq/run
-ADD usr/lsyncd.sh /etc/service/lsyncd/run
+COPY usr/dnsmasq.sh /etc/service/dnsmasq/run
+COPY usr/lsyncd.sh /etc/service/lsyncd/run
 
 
 # Clean up APT when done.

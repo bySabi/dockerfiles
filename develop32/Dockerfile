@@ -1,5 +1,5 @@
 # develop 32 bits
-# VERSION 0.0.1
+# VERSION 0.0.2
 
 FROM bySabi/ubuntu32
 MAINTAINER bySabi <flxinformatico@gmail.com>
@@ -23,10 +23,10 @@ RUN \
 	sed -i 's/.*session.*required.*pam_loginuid.so.*/session optional pam_loginuid.so/g' /etc/pam.d/sshd
 
 
-ADD usr/git-crypt /usr/local/bin/
+COPY usr/git-crypt /usr/local/bin/
 
 
-ADD usr/run.sh /
+COPY usr/run.sh /
 
 
 ENTRYPOINT ["/start.sh"]

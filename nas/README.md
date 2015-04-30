@@ -1,13 +1,14 @@
-# NAS a Netatalk (afp server) + Samba4 + Goodsync
+# NAS a Netatalk (afp server) + Samba4 + NFS + rsync + Google Drive
 
-A Dockerfile which produces a docker image that runs [Netatalk][netatalk] , [Samba4][samba] and [Goodsync][goodsync]. Based on work of  [ewindisch/docker-samba][ewindisch] and [grigio/docker-timemachine][grigio].
+A Dockerfile which produces a docker image that runs [Netatalk][netatalk] , [Samba4][samba], [Google Drive client][drive], [NFS server] and [Rsync server].
 A `afpd` share configured as a Time Capsule.
+The image work like a NAS server with a dedicated IP in privileged mode using [pipework][pipe].
 
 [netatalk]: http://netatalk.sourceforge.net/
-[goodsync]: http://www.goodsync.com/platforms/linux
-[grigio]: https://github.com/grigio/docker-timemachine
+[drive]: https://github.com/odeke-em/drive
 [samba]: http://www.samba.org/
-[ewindisch]: https://github.com/ewindisch/docker-samba
+
+
 
 Use `doquer`[doquer], a homemade script for easy live docker.
 [doquer]: https://github.com/bySabi/my_docker_util/tree/master/doquer
@@ -37,7 +38,7 @@ IMPORTANT!!
 
 2- By default docker daemon `Max open files` limits  is too low and must set above `65535` otherwise `netatalk` malfunction (you see volume´s but can´t authenticate) .
 
-See yourself: 
+See yourself:
 ```
 $ tail -f /var/log/netatalk.log
 .

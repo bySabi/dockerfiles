@@ -1,7 +1,7 @@
 # develop 64 bits
-# VERSION 0.0.6
+# VERSION 0.0.7
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -46,7 +46,7 @@ RUN \
 
 # Install golang
 #ENV GOPATH /root/develop/go
-#ADD conf/golang.setup /var/tmp/golang.setup
+#COPY conf/golang.setup /var/tmp/golang.setup
 #RUN setup_tool install /var/tmp/golang.setup
 
 
@@ -58,10 +58,12 @@ RUN \
 
 
 # add init script
-ADD usr/rc.local /etc/rc.local
+COPY usr/rc.local /etc/rc.local
 
+# enable SSH
+RUN rm -f /etc/service/sshd/down
 
-# Cleanup 
+# Cleanup
 RUN \
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

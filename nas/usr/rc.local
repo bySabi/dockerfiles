@@ -25,12 +25,6 @@ mkdir -p /run/rpc_pipefs/nfs
 ## rpcdebug -m nfsd -s proc && tail -f /var/log/messages
 # share´s: showmount -e localhost
 
-# goodsync
-ln -s /srv/conf.d/goodsync $HOME/.goodsync
-
-
-# update tools
-nohup setup_tool update goodsync &
 
 
 exit 0

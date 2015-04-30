@@ -1,7 +1,7 @@
 # Redis
-# VERSION 0.0.1
+# VERSION 0.0.2
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -27,7 +27,7 @@ RUN \
 
 
 # Install Redis
-ADD conf/redis.setup /var/tmp/redis.setup
+COPY conf/redis.setup /var/tmp/redis.setup
 RUN \
 : '# First that nothing create user redis' && \
 	useradd -M -U -s /bin/false -u 7777 redis && \
@@ -46,14 +46,12 @@ RUN \
 	apt-get install -y --no-install-recommends msmtp msmtp-mta && \
 	ln -s /srv/conf.d/msmtp/msmtprc /etc/msmtprc
 
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 # add init script.
-ADD usr/rc.local /etc/rc.local
+COPY usr/rc.local /etc/rc.local
 
 # create runit service´s
-ADD usr/redis.sh /etc/service/redis/run
+COPY usr/redis.sh /etc/service/redis/run
 
 
 # Clean up APT when done.

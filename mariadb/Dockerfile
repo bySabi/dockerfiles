@@ -1,7 +1,7 @@
 # MariaDB
-# VERSION 0.1.1
+# VERSION 0.1.2
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -32,14 +32,11 @@ RUN \
 	rm -r /var/lib/mysql
 
 
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
-
 # add init script. Include mariadb setup
-ADD usr/rc.local /etc/rc.local
+COPY usr/rc.local /etc/rc.local
 
 # create runit service´s
-ADD usr/mariadb.sh /etc/service/mariadb/run
+COPY usr/mariadb.sh /etc/service/mariadb/run
 
 
 # Clean up APT when done.

@@ -1,7 +1,7 @@
 # mosquitto
-# VERSION 0.0.2
+# VERSION 0.0.3
 
-FROM phusion/baseimage:0.9.12
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 # Set correct environment variables.
@@ -25,7 +25,7 @@ RUN \
 	apt-get install -y --no-install-recommends mosquitto mosquitto-clients
 
 
-ADD usr/mosquitto.sh /etc/service/mosquitto/run
+COPY usr/mosquitto.sh /etc/service/mosquitto/run
 
 
 #mosquitto_sub -h dns.iguanalab.lan -d -t hello/world

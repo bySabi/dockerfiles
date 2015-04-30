@@ -1,7 +1,7 @@
 # PostgreSQL
-# VERSION 0.0.1
+# VERSION 0.0.2
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -34,14 +34,11 @@ RUN \
 	ln -s /usr/lib/postgresql/$PG_VERSION /usr/lib/postgresql/current && \
 	/etc/init.d/postgresql stop
 
-# Disable SSH
-RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
-
 # add init script. Include postgresql setup
-ADD usr/rc.local /etc/rc.local
+COPY usr/rc.local /etc/rc.local
 
 # create runit service´s
-ADD usr/postgresql.sh /etc/service/postgresql/run
+COPY usr/postgresql.sh /etc/service/postgresql/run
 
 
 # Clean up APT when done.

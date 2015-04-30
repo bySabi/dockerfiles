@@ -1,7 +1,7 @@
 # nas
-# VERSION 0.5.3
+# VERSION 0.6.0
 
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER bySabi <flxinformatico@gmail.com>
 
 
@@ -19,23 +19,16 @@ RUN \
 	apt-get install -y --no-install-recommends software-properties-common
 
 
-# setup_tool tools manager
-RUN \
-	latest_url=https://raw.githubusercontent.com/bySabi/my_docker_util/master/setup_tool/setup_tool   && \
-	curl -L -o /usr/local/bin/setup_tool ${latest_url} && \
-	chmod a+x /usr/local/bin/setup_tool
-
-
 ## NAS
 
 # Install samba4 from sernet enterprise repository https://portal.enterprisesamba.com/
-ADD conf/sernet-samba-4.list /etc/apt/sources.list.d/sernet-samba-4.list
+COPY conf/sernet-samba-4.list /etc/apt/sources.list.d/sernet-samba-4.list
 RUN \
 	curl -L -o /var/tmp/sernet-samba-keyring_all.deb http://ftp.sernet.de/pub/sernet-samba-keyring_1.4_all.deb && \
 	dpkg -i /var/tmp/sernet-samba-keyring_all.deb && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends samba
-ADD conf/smb.conf /etc/samba/smb.conf
+COPY conf/smb.conf /etc/samba/smb.conf
 
 
 # Install avahi & netatalk from ppa repository
@@ -44,11 +37,11 @@ RUN \
 	add-apt-repository -y ppa:ali-asad-lotia/netatalk-stable && \
 	apt-get update 1>/dev/null && \
 	apt-get install -y --no-install-recommends netatalk avahi-daemon
-ADD conf/afp.conf /etc/netatalk/afp.conf
+COPY conf/afp.conf /etc/netatalk/afp.conf
 
-# Add avahi services
-ADD conf/afpd.service /etc/avahi/services/afpd.service
-#ADD conf/smbd.service /etc/avahi/services/smbd.service
+# add avahi services
+COPY conf/afpd.service /etc/avahi/services/afpd.service
+#COPY conf/smbd.service /etc/avahi/services/smbd.service
 
 
 # Install nfs
@@ -72,7 +65,7 @@ RUN \
 
 # Enable "extra" users, this makes overlaying our passwd/shadow/group content easier
 ## user management tool
-ADD usr/nas-user /usr/local/bin/nas-user
+COPY usr/nas-user /usr/local/bin/nas-user
 RUN \
 	apt-get install -y --no-install-recommends libnss-extrausers && \
 	sed -i '/^\(passwd\|group\|shadow\):/{ s/$/ extrausers/; }' /etc/nsswitch.conf
@@ -86,14 +79,11 @@ RUN \
 
 
 ## BACKUP
-
-# Install goodsync
-ADD conf/goodsync.setup /var/tmp/goodsync.setup
-RUN setup_tool install /var/tmp/goodsync.setup
-
+# Install Google Drive client: https://github.com/odeke-em/drive
 RUN \
-	apt-get install -y --no-install-recommends perl make cpanminus && \
-	cpanm --notest HTTP::Server::Simple::CGI Net::DNS::Nameserver
+	add-apt-repository -y ppa:twodopeshaggy/drive && \
+	apt-get update 1>/dev/null && \
+	apt-get install -y --no-install-recommends drive
 
 
 # install silence-unless-failed from silence-unless-failed
@@ -113,26 +103,25 @@ RUN \
 RUN \
 	apt-get install -y --no-install-recommends lsyncd
 
-
-# Install ipsvd super server
+# Install ipsvd super server for "rsyncd on demand"
 RUN \
 	apt-get install -y --no-install-recommends ipsvd
 
 
 # add init script. Include pipework check.
-ADD usr/rc.local /etc/rc.local
+COPY usr/rc.local /etc/rc.local
 
 # create runit service´s
-ADD usr/dbus.sh /etc/service/dbus/run
-ADD usr/avahi.sh /etc/service/avahi/run
-ADD usr/netatalk.sh /etc/service/netatalk/run
-ADD usr/smbd.sh /etc/service/smbd/run
-ADD usr/nmbd.sh /etc/service/nmbd/run
-ADD usr/rpcbind.sh /etc/service/rpcbind/run
-ADD usr/nfsd.sh /etc/service/nfsd/run
-ADD usr/idmapd.sh /etc/service/idmapd/run
-ADD usr/lsyncd.sh /etc/service/lsyncd/run
-ADD usr/rsync.sh /etc/service/rsync/run
+COPY usr/dbus.sh /etc/service/dbus/run
+COPY usr/avahi.sh /etc/service/avahi/run
+COPY usr/netatalk.sh /etc/service/netatalk/run
+COPY usr/smbd.sh /etc/service/smbd/run
+COPY usr/nmbd.sh /etc/service/nmbd/run
+COPY usr/rpcbind.sh /etc/service/rpcbind/run
+COPY usr/nfsd.sh /etc/service/nfsd/run
+COPY usr/idmapd.sh /etc/service/idmapd/run
+COPY usr/lsyncd.sh /etc/service/lsyncd/run
+COPY usr/rsync.sh /etc/service/rsync/run
 
 
 # pipework --wait
@@ -141,6 +130,8 @@ RUN \
 	curl -L -o /usr/local/bin/pipework ${latest_url} && \
 	chmod a+x /usr/local/bin/pipework
 
+# enable SSH
+RUN rm -f /etc/service/sshd/down
 
 # Clean up APT when done.
 RUN \
